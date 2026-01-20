@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proveedores - ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link th:href="@{/css/proveedores.css}" rel="stylesheet">
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+        </div>
+        <span class="logo-text">ERP</span>
+    </div>
+    <nav>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a th:href="@{/inicio}" class="nav-link">
+                    <i class="bi bi-house-door"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/clientes}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/trabajadores}" class="nav-link">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Trabajadores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/proveedores}" class="nav-link active">
+                    <i class="bi bi-truck"></i>
+                    <span>Proveedores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/productos}" class="nav-link">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Productos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/pedidos}" class="nav-link">
+                    <i class="bi bi-cart3"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Header -->
+    <header class="header">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar...">
+        </div>
+        <div class="header-right">
+            <button class="icon-btn">
+                <i class="bi bi-envelope"></i>
+            </button>
+            <button class="icon-btn notification">
+                <i class="bi bi-bell"></i>
+                <span class="badge-notify">3</span>
+            </button>
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${usuario.username}">Usuario</div>
+                    <span class="user-role">Cuenta Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Alertas -->
+    <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${exito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Panel Principal de Proveedores -->
+        <section class="proveedores-panel">
+            <div class="panel-header">
+                <h1 class="panel-title">Proveedores</h1>
+                <div class="search-filter">
+                    <form th:action="@{/proveedores}" method="get" class="search-form">
+                        <input type="text" name="busqueda" th:value="${busqueda}" placeholder="Buscar...">
+                        <button type="submit"><i class="bi bi-search"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel-content">
+                <!-- Estadísticas Circulares -->
+                <div class="stats-row">
+                    <div class="stat-circle activo">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas.porcentajeActivos + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas.porcentajeActivos + '%'}">70%</span>
+                            <span class="stat-label">Activos</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle pendiente">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas.porcentajePendientes + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas.porcentajePendientes + '%'}">20%</span>
+                            <span class="stat-label">Pendiente</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle baja">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas.porcentajeBajas + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas.porcentajeBajas + '%'}">10%</span>
+                            <span class="stat-label">Baja</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Proveedores -->
+                <div class="table-container">
+                    <table class="proveedores-table">
+                        <thead>
+                        <tr>
+                            <th>
+                                <a th:href="@{/proveedores(ordenarPor='id', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Id <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/proveedores(ordenarPor='nombre', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Nombre <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Ciudad</th>
+                            <th>
+                                <a th:href="@{/proveedores(ordenarPor='metodoEnvio', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Método Envío <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/proveedores(ordenarPor='estado', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Estado <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="proveedor, iterStat : ${proveedores}">
+                            <td th:text="${iterStat.index + 1 + (paginaActual * tamanio)}">1.</td>
+                            <td th:text="${proveedor.nombre}">Distribuidora López</td>
+                            <td th:text="${proveedor.correo}">contacto@lopez.com</td>
+                            <td th:text="${proveedor.telefono}">912345678</td>
+                            <td th:text="${proveedor.ciudad}">Madrid</td>
+                            <td th:text="${proveedor.metodoEnvio ?: '-'}">Express</td>
+                            <td>
+                                <span class="badge-estado"
+                                      th:classappend="${proveedor.estado.name() == 'ACTIVO' ? 'activo' : (proveedor.estado.name() == 'PENDIENTE' ? 'pendiente' : 'baja')}"
+                                      th:text="${proveedor.estado}">Activo</span>
+                            </td>
+                            <td class="acciones">
+                                <a th:href="@{/proveedores/ver/{id}(id=${proveedor.id})}" class="btn-action ver" title="Ver">
+                                    <i class="bi bi-list"></i>
+                                </a>
+                                <a th:href="@{/proveedores/editar/{id}(id=${proveedor.id})}" class="btn-action editar" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/proveedores/eliminar/{id}(id=${proveedor.id})}"
+                                   class="btn-action eliminar"
+                                   title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar este proveedor?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(proveedores)}">
+                            <td colspan="8" class="text-center py-4">No hay proveedores registrados</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <nav class="pagination-container" th:if="${totalPaginas > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/proveedores(pagina=${paginaActual - 1}, tamanio=${tamanio})}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                            th:if="${i < 3 || i == totalPaginas - 1 || (i >= paginaActual - 1 && i <= paginaActual + 1)}"
+                            th:classappend="${i == paginaActual} ? 'active'">
+                            <a class="page-link" th:href="@{/proveedores(pagina=${i}, tamanio=${tamanio})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item disabled" th:if="${totalPaginas > 5}">
+                            <span class="page-link">...</span>
+                        </li>
+                        <li class="page-item" th:if="${totalPaginas > 5 && paginaActual < totalPaginas - 3}">
+                            <a class="page-link" th:href="@{/proveedores(pagina=${totalPaginas - 1}, tamanio=${tamanio})}" th:text="${totalPaginas}">32</a>
+                        </li>
+                        <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/proveedores(pagina=${paginaActual + 1}, tamanio=${tamanio})}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Panel Lateral Derecho -->
+        <aside class="side-panel">
+            <!-- Botones de Acción -->
+            <div class="action-buttons">
+                <a th:href="@{/proveedores/nuevo}" class="btn-crear">
+                    <i class="bi bi-plus-lg"></i> Crear proveedor
+                </a>
+                <button class="btn-eliminar" data-bs-toggle="modal" data-bs-target="#modalEliminar">
+                    <i class="bi bi-trash"></i> Eliminar proveedor
+                </button>
+                <button class="btn-filtrar" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel"></i> Filtrar proveedor
+                </button>
+                <ul class="dropdown-menu dropdown-filtros">
+                    <li><a class="dropdown-item" th:href="@{/proveedores}">Todos</a></li>
+                    <li><a class="dropdown-item" th:href="@{/proveedores/filtrar/ACTIVO}">Activos</a></li>
+                    <li><a class="dropdown-item" th:href="@{/proveedores/filtrar/PENDIENTE}">Pendientes</a></li>
+                    <li><a class="dropdown-item" th:href="@{/proveedores/filtrar/BAJA}">Baja</a></li>
+                </ul>
+            </div>
+
+            <!-- Total Proveedores -->
+            <div class="total-proveedores">
+                <span class="total-numero" th:text="${estadisticas.total}">150</span>
+                <span class="total-texto">Proveedores Registrados</span>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Sección Inferior: Top Proveedores -->
+    <div class="bottom-section">
+        <!-- Top Proveedores -->
+        <div class="card-section">
+            <h2 class="section-title">Top Proveedores</h2>
+            <table class="mini-table">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Ciudad</th>
+                    <th>Método Envío</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="proveedor : ${topProveedores}">
+                    <td th:text="${proveedor.nombre}">Distribuidora López</td>
+                    <td th:text="${proveedor.ciudad ?: '-'}">Madrid</td>
+                    <td th:text="${proveedor.metodoEnvio ?: '-'}">Express</td>
+                    <td>
+                        <span class="badge-estado-mini"
+                              th:classappend="${proveedor.estado.name() == 'ACTIVO' ? 'activo' : (proveedor.estado.name() == 'PENDIENTE' ? 'pendiente' : 'baja')}"
+                              th:text="${proveedor.estado}">Activo</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav class="mini-pagination">
+                <span class="page-indicator active">1</span>
+                <span class="page-indicator">2</span>
+                <span class="page-indicator">3</span>
+                <span class="page-dots">...</span>
+                <span class="page-indicator">32</span>
+                <i class="bi bi-chevron-right"></i>
+            </nav>
+        </div>
+
+        <!-- Proveedores por Ciudad -->
+        <div class="card-section">
+            <h2 class="section-title">Proveedores por Ciudad</h2>
+            <table class="mini-table">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Ciudad</th>
+                    <th>Teléfono</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="proveedor : ${topProveedores}">
+                    <td th:text="${proveedor.nombre}">Suministros García</td>
+                    <td th:text="${proveedor.ciudad ?: '-'}">Barcelona</td>
+                    <td th:text="${proveedor.telefono ?: '-'}">987654321</td>
+                    <td>
+                        <span class="badge-estado-mini"
+                              th:classappend="${proveedor.estado.name() == 'ACTIVO' ? 'activo' : (proveedor.estado.name() == 'PENDIENTE' ? 'pendiente' : 'baja')}"
+                              th:text="${proveedor.estado}">Activo</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <nav class="mini-pagination">
+                <span class="page-indicator active">1</span>
+                <span class="page-indicator">2</span>
+                <span class="page-indicator">3</span>
+                <span class="page-dots">...</span>
+                <span class="page-indicator">32</span>
+                <i class="bi bi-chevron-right"></i>
+            </nav>
+        </div>
+    </div>
+</main>
+
+<!-- Modal Eliminar -->
+<div class="modal fade" id="modalEliminar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Eliminar Proveedor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Selecciona el proveedor que deseas eliminar:</p>
+                <select class="form-select" id="selectEliminar">
+                    <option th:each="proveedor : ${proveedores}" th:value="${proveedor.id}" th:text="${proveedor.nombre}"></option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" onclick="eliminarProveedorSeleccionado()">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    function eliminarProveedorSeleccionado() {
+        const select = document.getElementById('selectEliminar');
+        const proveedorId = select.value;
+        if (proveedorId) {
+            if (confirm('¿Estás seguro de eliminar este proveedor?')) {
+                window.location.href = '/proveedores/eliminar/' + proveedorId;
+            }
+        }
+    }
+</script>
+</body>
+</html>

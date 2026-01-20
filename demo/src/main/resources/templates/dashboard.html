@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link th:href="@{/css/index.css}" rel="stylesheet">
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+      </svg>
+    </div>
+    <span class="logo-text">ERP</span>
+  </div>
+
+  <nav>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a th:href="@{dashboard}" class="nav-link active">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9,22 9,12 15,12 15,22"/>
+          </svg>
+          Inicio
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{clientes}" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Clientes
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          </svg>
+          Trabajadores
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{proveedores}" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Proveedores
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/departamentos}" class="nav-link active">
+          <i class="bi bi-building"></i>
+          <span>Departamentos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 0 1-8 0"/>
+          </svg>
+          Productos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Pedidos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14,2 14,8 20,8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Almacenes
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Botón Cerrar Sesión en el sidebar -->
+  <div class="sidebar-footer" style="margin-top: auto; padding: 20px;">
+    <a th:href="@{/logout}" class="nav-link" style="color: #ef4444;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width: 20px; height: 20px;">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16,17 21,12 16,7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Cerrar Sesión
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+  <!-- Header -->
+  <header class="header">
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text" placeholder="Buscar...">
+    </div>
+
+    <div class="user-section">
+      <button class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+          <polyline points="22,6 12,13 2,6"/>
+        </svg>
+      </button>
+      <button class="icon-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+      </button>
+      <div class="user-profile">
+        <div class="user-info">
+          <div class="user-name" th:text="${usuario.username}">Usuario</div>
+          <div class="user-email" th:text="${usuario.email}" style="font-size: 12px; color: #666;"></div>
+        </div>
+        <!-- Avatar con inicial del usuario -->
+        <div class="user-avatar" th:text="${#strings.toUpperCase(#strings.substring(usuario.username, 0, 1))}">U</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Dashboard -->
+  <div class="dashboard-grid">
+    <div class="left-column">
+      <!-- Partners Card -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <h2 class="card-title">Empresas Colaboradoras</h2>
+          <a href="#" class="card-action">Ver todas</a>
+        </div>
+        <div class="partners-grid">
+          <div class="partner">
+            <div class="partner-logo">M</div>
+            <div class="partner-name">Microsoft</div>
+          </div>
+          <div class="partner">
+            <div class="partner-logo"></div>
+            <div class="partner-name">Apple</div>
+          </div>
+          <div class="partner">
+            <div class="partner-logo">intel</div>
+            <div class="partner-name">Intel</div>
+          </div>
+          <div class="partner">
+            <div class="partner-logo">IBM</div>
+            <div class="partner-name">IBM</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Table -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Ventas Recientes</h2>
+          <a href="#" class="card-action">Ver todas</a>
+        </div>
+        <table class="table">
+          <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Envío</th>
+            <th>Fecha</th>
+            <th>Total</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>
+              <div class="company-cell">
+                <div class="company-icon">M</div>
+                <span>Microsoft</span>
+              </div>
+            </td>
+            <td><span class="badge badge-express">Express</span></td>
+            <td>13 Dic 2024</td>
+            <td class="amount">75.67€</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="company-cell">
+                <div class="company-icon"></div>
+                <span>Apple</span>
+              </div>
+            </td>
+            <td><span class="badge badge-normal">Normal</span></td>
+            <td>14 Dic 2024</td>
+            <td class="amount">250.00€</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="company-cell">
+                <div class="company-icon">i</div>
+                <span>Intel</span>
+              </div>
+            </td>
+            <td><span class="badge badge-premium">Premium</span></td>
+            <td>07 Dic 2024</td>
+            <td class="amount">19.50€</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="company-cell">
+                <div class="company-icon">IBM</div>
+                <span>IBM</span>
+              </div>
+            </td>
+            <td><span class="badge badge-normal">Normal</span></td>
+            <td>06 Dic 2024</td>
+            <td class="amount">350.00€</td>
+          </tr>
+          <tr>
+            <td>
+              <div class="company-cell">
+                <div class="company-icon">IN</div>
+                <span>Indra</span>
+              </div>
+            </td>
+            <td><span class="badge badge-premium">Premium</span></td>
+            <td>31 Nov 2024</td>
+            <td class="amount">430.00€</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="right-column">
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">1,245</div>
+          <div class="stat-label">Pedidos</div>
+        </div>
+        <div class="stat-card light">
+          <div class="stat-value">48.5K€</div>
+          <div class="stat-label">Ingresos</div>
+        </div>
+      </div>
+
+      <!-- Calendar -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="calendar-header">
+          <span class="calendar-month">Noviembre 2025</span>
+          <div class="calendar-nav">
+            <button>‹</button>
+            <button>›</button>
+          </div>
+        </div>
+        <div class="calendar-grid">
+          <div class="calendar-day-header">D</div>
+          <div class="calendar-day-header">L</div>
+          <div class="calendar-day-header">M</div>
+          <div class="calendar-day-header">X</div>
+          <div class="calendar-day-header">J</div>
+          <div class="calendar-day-header">V</div>
+          <div class="calendar-day-header">S</div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day"></div>
+          <div class="calendar-day">1</div>
+          <div class="calendar-day">2</div>
+          <div class="calendar-day">3</div>
+          <div class="calendar-day">4</div>
+          <div class="calendar-day">5</div>
+          <div class="calendar-day">6</div>
+          <div class="calendar-day">7</div>
+          <div class="calendar-day">8</div>
+          <div class="calendar-day">9</div>
+          <div class="calendar-day">10</div>
+          <div class="calendar-day">11</div>
+          <div class="calendar-day">12</div>
+          <div class="calendar-day">13</div>
+          <div class="calendar-day">14</div>
+          <div class="calendar-day">15</div>
+          <div class="calendar-day">16</div>
+          <div class="calendar-day">17</div>
+          <div class="calendar-day today">18</div>
+          <div class="calendar-day">19</div>
+          <div class="calendar-day">20</div>
+          <div class="calendar-day">21</div>
+          <div class="calendar-day">22</div>
+          <div class="calendar-day">23</div>
+          <div class="calendar-day">24</div>
+          <div class="calendar-day">25</div>
+          <div class="calendar-day">26</div>
+          <div class="calendar-day">27</div>
+          <div class="calendar-day">28</div>
+          <div class="calendar-day">29</div>
+          <div class="calendar-day">30</div>
+        </div>
+      </div>
+
+      <!-- Chart & Progress -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Ganancias Diarias</h2>
+        </div>
+        <div class="chart-container">
+          <div class="chart-bar" style="height: 40%;"></div>
+          <div class="chart-bar" style="height: 65%;"></div>
+          <div class="chart-bar" style="height: 45%;"></div>
+          <div class="chart-bar" style="height: 80%;"></div>
+          <div class="chart-bar" style="height: 55%;"></div>
+          <div class="chart-bar" style="height: 90%;"></div>
+          <div class="chart-bar" style="height: 70%;"></div>
+        </div>
+        <div class="progress-list">
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Normal</span>
+              <span class="progress-value">50%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width: 50%;"></div>
+            </div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Premium</span>
+              <span class="progress-value">50%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill gray" style="width: 50%;"></div>
+            </div>
+          </div>
+          <div class="progress-item">
+            <div class="progress-header">
+              <span class="progress-label">Express</span>
+              <span class="progress-value">25%</span>
+            </div>
+            <div class="progress-bar">
+              <div class="progress-fill light" style="width: 25%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+</body>
+</html>

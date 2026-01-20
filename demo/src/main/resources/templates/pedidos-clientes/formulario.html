@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${titulo} + ' - ERP'">Crear Pedido Cliente - ERP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link th:href="@{/css/pedidos.css}" rel="stylesheet">
+  <style>
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .form-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 40px;
+    }
+
+    .form-title {
+        font-size: 28px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+        text-align: center;
+    }
+
+    .form-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .form-section {
+        margin-bottom: 32px;
+    }
+
+    .form-section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--accent-cyan);
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 14px 16px;
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--accent-cyan);
+        box-shadow: 0 0 0 3px rgba(57, 217, 217, 0.1);
+    }
+
+    /* Selector de Productos */
+    .productos-selector {
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .productos-search {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .productos-search input {
+        flex: 1;
+    }
+
+    .productos-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+    }
+
+    .producto-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-color);
+        transition: background 0.2s;
+    }
+
+    .producto-item:last-child {
+        border-bottom: none;
+    }
+
+    .producto-item:hover {
+        background: var(--bg-card);
+    }
+
+    .producto-info {
+        flex: 1;
+    }
+
+    .producto-nombre {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+
+    .producto-detalles {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .producto-cantidad {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .producto-cantidad input {
+        width: 70px;
+        padding: 6px;
+        text-align: center;
+    }
+
+    .btn-add-producto {
+        padding: 6px 16px;
+        background: var(--accent-cyan);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--bg-dark);
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-add-producto:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(57, 217, 217, 0.3);
+    }
+
+    /* Productos Seleccionados */
+    .productos-seleccionados {
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+    }
+
+    .seleccionado-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        margin-bottom: 12px;
+    }
+
+    .seleccionado-info {
+        flex: 1;
+    }
+
+    .seleccionado-nombre {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .seleccionado-precio {
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .seleccionado-cantidad {
+        color: var(--accent-cyan);
+        font-weight: 600;
+        margin: 0 20px;
+    }
+
+    .seleccionado-total {
+        color: var(--accent-green);
+        font-weight: 600;
+        font-size: 16px;
+        margin: 0 20px;
+    }
+
+    .btn-remove {
+        padding: 6px 12px;
+        background: var(--accent-red);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-remove:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+    }
+
+    .total-pedido {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: var(--bg-card);
+        border-radius: var(--radius-sm);
+        margin-top: 16px;
+    }
+
+    .total-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .total-monto {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--accent-green);
+    }
+
+    .form-actions {
+        display: flex;
+        gap: 16px;
+        margin-top: 32px;
+    }
+
+    .btn-submit {
+        flex: 1;
+        padding: 14px 24px;
+        background: linear-gradient(135deg, var(--accent-cyan), #2dd4bf);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--bg-dark);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(57, 217, 217, 0.3);
+    }
+
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .btn-cancel {
+        flex: 1;
+        padding: 14px 24px;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+    }
+
+    .btn-cancel:hover {
+        background: var(--bg-card-secondary);
+        border-color: var(--accent-red);
+        color: var(--accent-red);
+    }
+
+    .back-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 24px;
+        transition: color 0.3s;
+    }
+
+    .back-link:hover {
+        color: var(--accent-cyan);
+    }
+
+    .form-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+
+    .form-icon i {
+        font-size: 28px;
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+  </style>
+</head>
+<body>
+<!-- Sidebar (igual que la lista) -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="logo-text">ERP</span>
+  </div>
+  <nav>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a th:href="@{/inicio}" class="nav-link">
+          <i class="bi bi-house-door"></i>
+          <span>Inicio</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/pedidos-clientes}" class="nav-link active">
+          <i class="bi bi-cart3"></i>
+          <span>Pedidos</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <div class="form-container">
+    <a th:href="@{/pedidos-clientes}" class="back-link">
+      <i class="bi bi-arrow-left"></i>
+      Volver a Pedidos
+    </a>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="form-card">
+      <div class="form-icon">
+        <i class="bi bi-cart-plus"></i>
+      </div>
+      <h1 class="form-title" th:text="${titulo}">Crear Pedido Cliente</h1>
+      <p class="form-subtitle">Complete la información del pedido y seleccione los productos</p>
+
+      <form th:action="${accion == 'crear'} ? @{/pedidos-clientes/crear} : @{/pedidos-clientes/actualizar/{id}(id=${pedido.id})}"
+            th:object="${pedido}"
+            method="post"
+            id="formPedido">
+
+        <!-- SECCIÓN 1: Datos del Pedido -->
+        <div class="form-section">
+          <h3 class="form-section-title">Información del Pedido</h3>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="idCliente">Cliente</label>
+              <select id="idCliente" th:field="*{idCliente}" class="form-select" required>
+                <option value="">-- Seleccionar Cliente --</option>
+                <option th:each="cliente : ${clientes}"
+                        th:value="${cliente.id}"
+                        th:text="${cliente.nombre}"
+                        th:selected="${pedido.idCliente != null && pedido.idCliente == cliente.id}">
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="idTrabajador">Trabajador</label>
+              <select id="idTrabajador" th:field="*{idTrabajador}" class="form-select" required>
+                <option value="">-- Seleccionar Trabajador --</option>
+                <option th:each="trabajador : ${trabajadores}"
+                        th:value="${trabajador.id}"
+                        th:text="${trabajador.nombre}"
+                        th:selected="${pedido.idTrabajador != null && pedido.idTrabajador == trabajador.id}">
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="idAlmacen">Almacén</label>
+              <select id="idAlmacen" th:field="*{idAlmacen}" class="form-select" required>
+                <option value="">-- Seleccionar Almacén --</option>
+                <option th:each="almacen : ${almacenes}"
+                        th:value="${almacen.id}"
+                        th:text="${almacen.direccion}"
+                        th:selected="${pedido.idAlmacen != null && pedido.idAlmacen == almacen.id}">
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="idMetodoEnvio">Método de Envío</label>
+              <select id="idMetodoEnvio" th:field="*{idMetodoEnvio}" class="form-select" required>
+                <option value="">-- Seleccionar Método de Envío --</option>
+                <option th:each="metodo : ${metodosEnvio}"
+                        th:value="${metodo.id}"
+                        th:text="${metodo.nombre}"
+                        th:selected="${pedido.idMetodoEnvio != null && pedido.idMetodoEnvio == metodo.id}">
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="direccion">Dirección de Entrega</label>
+              <input type="text" id="direccion" th:field="*{direccion}" placeholder="Calle, número, ciudad" required>
+            </div>
+
+            <div class="form-group">
+              <label for="estado">Estado</label>
+              <select id="estado" th:field="*{estado}" required>
+                <option th:each="est : ${estados}" th:value="${est}" th:text="${est.displayName}"></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fechaPedido">Fecha del Pedido</label>
+              <input type="date" id="fechaPedido" th:field="*{fechaPedido}">
+            </div>
+
+            <div class="form-group">
+              <label for="descuento">Descuento (%)</label>
+              <input type="number" id="descuento" th:field="*{descuento}" placeholder="0-100" min="0" max="100">
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: Selector de Productos -->
+        <div class="form-section">
+          <h3 class="form-section-title">Productos del Pedido</h3>
+
+          <div class="productos-selector">
+            <div class="productos-search">
+              <input type="text" id="searchProducto" placeholder="Buscar producto por nombre..." onkeyup="filtrarProductos()">
+            </div>
+
+            <div class="productos-list" id="productosDisponibles">
+              <div class="producto-item" th:each="producto : ${productosDisponibles}"
+                   th:attr="data-id=${producto.id},data-nombre=${producto.nombre},data-precio=${producto.precioUnitario},data-descuento=${producto.descuento ?: 0}">
+                <div class="producto-info">
+                  <div class="producto-nombre" th:text="${producto.nombre}">Producto A</div>
+                  <div class="producto-detalles">
+                    <span th:text="'Precio: ' + ${#numbers.formatDecimal(producto.precioUnitario, 0, 'COMMA', 2, 'POINT')} + '€'">Precio: 25.00€</span> |
+                    <span th:text="'Stock: ' + ${producto.stock}">Stock: 100</span> |
+                    <span th:if="${producto.descuento != null}" th:text="'Dto: ' + ${producto.descuento} + '%'">Dto: 10%</span>
+                  </div>
+                </div>
+                <div class="producto-cantidad">
+                  <input type="number"
+                         class="cantidad-input"
+                         th:id="'cant_' + ${producto.id}"
+                         min="1"
+                         th:max="${producto.stock}"
+                         value="1">
+                  <button type="button"
+                          class="btn-add-producto"
+                          onclick="agregarProductoDesdeBtn(this)">
+                    <i class="bi bi-plus"></i> Agregar
+                  </button>
+                </div>
+              </div>
+              <div th:if="${#lists.isEmpty(productosDisponibles)}" class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>No hay productos disponibles</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Productos Seleccionados -->
+          <div class="productos-seleccionados">
+            <h4 style="margin-bottom: 16px; color: var(--text-primary);">Productos Seleccionados</h4>
+            <div id="productosSeleccionados">
+              <div class="empty-state">
+                <i class="bi bi-cart-x"></i>
+                <p>No hay productos seleccionados</p>
+              </div>
+            </div>
+            <div class="total-pedido" id="totalPedido" style="display: none;">
+              <span class="total-label">TOTAL:</span>
+              <span class="total-monto" id="totalMonto">0.00€</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <a th:href="@{/pedidos-clientes}" class="btn-cancel">Cancelar</a>
+          <button type="submit" class="btn-submit" id="btnSubmit" disabled>
+            <span th:text="${accion == 'crear' ? 'Crear Pedido' : 'Guardar Cambios'}">Crear Pedido</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  let productosSeleccionados = [];
+
+  function agregarProductoDesdeBtn(btn) {
+      const item = btn.closest('.producto-item');
+      const id = parseInt(item.getAttribute('data-id'));
+      const nombre = item.getAttribute('data-nombre');
+      const precio = parseFloat(item.getAttribute('data-precio'));
+      const descuento = parseInt(item.getAttribute('data-descuento'));
+
+      agregarProducto(id, nombre, precio, descuento);
+  }
+
+  function agregarProducto(id, nombre, precio, descuento) {
+      const cantidadInput = document.getElementById('cant_' + id);
+      const cantidad = parseInt(cantidadInput.value);
+
+      // Verificar si ya existe
+      const existente = productosSeleccionados.find(p => p.id === id);
+      if (existente) {
+          existente.cantidad += cantidad;
+      } else {
+          productosSeleccionados.push({
+              id: id,
+              nombre: nombre,
+              precio: precio,
+              descuento: descuento,
+              cantidad: cantidad
+          });
+      }
+
+      renderizarSeleccionados();
+      cantidadInput.value = 1;
+  }
+
+  function eliminarProducto(id) {
+      productosSeleccionados = productosSeleccionados.filter(p => p.id !== id);
+      renderizarSeleccionados();
+  }
+
+  function renderizarSeleccionados() {
+      const container = document.getElementById('productosSeleccionados');
+      const totalPedidoDiv = document.getElementById('totalPedido');
+      const btnSubmit = document.getElementById('btnSubmit');
+
+      if (productosSeleccionados.length === 0) {
+          container.innerHTML = `
+              <div class="empty-state">
+                  <i class="bi bi-cart-x"></i>
+                  <p>No hay productos seleccionados</p>
+              </div>
+          `;
+          totalPedidoDiv.style.display = 'none';
+          btnSubmit.disabled = true;
+          return;
+      }
+
+      let html = '';
+      let totalGeneral = 0;
+
+      productosSeleccionados.forEach(producto => {
+          const subtotal = producto.precio * producto.cantidad;
+          const descuentoAplicado = subtotal * (producto.descuento / 100);
+          const total = subtotal - descuentoAplicado;
+          totalGeneral += total;
+
+          html += `
+              <div class="seleccionado-item">
+                  <div class="seleccionado-info">
+                      <div class="seleccionado-nombre">${producto.nombre}</div>
+                      <div class="seleccionado-precio">${producto.precio.toFixed(2)}€ × ${producto.cantidad} ${producto.descuento > 0 ? '(-' + producto.descuento + '%)' : ''}</div>
+                  </div>
+                  <span class="seleccionado-cantidad">${producto.cantidad} uds</span>
+                  <span class="seleccionado-total">${total.toFixed(2)}€</span>
+                  <button type="button" class="btn-remove" onclick="eliminarProducto(${producto.id})">
+                      <i class="bi bi-x"></i>
+                  </button>
+              </div>
+          `;
+      });
+
+      container.innerHTML = html;
+
+      // Mostrar total
+      const descuentoPedido = parseInt(document.getElementById('descuento').value) || 0;
+      const descuentoPedidoMonto = totalGeneral * (descuentoPedido / 100);
+      const totalFinal = totalGeneral - descuentoPedidoMonto;
+
+      document.getElementById('totalMonto').textContent = totalFinal.toFixed(2) + '€';
+      totalPedidoDiv.style.display = 'flex';
+      btnSubmit.disabled = false;
+  }
+
+  // Actualizar total cuando cambie el descuento del pedido
+  document.getElementById('descuento').addEventListener('input', renderizarSeleccionados);
+
+  // Al enviar el formulario, agregar campos hidden con los productos
+  document.getElementById('formPedido').addEventListener('submit', function(e) {
+      if (productosSeleccionados.length === 0) {
+          e.preventDefault();
+          alert('Debe seleccionar al menos un producto');
+          return;
+      }
+
+      // Limpiar inputs anteriores
+      const oldInputs = this.querySelectorAll('.producto-hidden');
+      oldInputs.forEach(input => input.remove());
+
+      // Agregar nuevos inputs
+      productosSeleccionados.forEach((producto, index) => {
+          const inputId = document.createElement('input');
+          inputId.type = 'hidden';
+          inputId.name = 'productosIds';
+          inputId.value = producto.id;
+          inputId.className = 'producto-hidden';
+          this.appendChild(inputId);
+
+          const inputCantidad = document.createElement('input');
+          inputCantidad.type = 'hidden';
+          inputCantidad.name = 'cantidades';
+          inputCantidad.value = producto.cantidad;
+          inputCantidad.className = 'producto-hidden';
+          this.appendChild(inputCantidad);
+      });
+  });
+
+  function filtrarProductos() {
+      const search = document.getElementById('searchProducto').value.toLowerCase();
+      const items = document.querySelectorAll('.producto-item');
+
+      items.forEach(item => {
+          const nombre = item.querySelector('.producto-nombre').textContent.toLowerCase();
+          if (nombre.includes(search)) {
+              item.style.display = 'flex';
+          } else {
+              item.style.display = 'none';
+          }
+      });
+  }
+</script>
+</body>
+</html>

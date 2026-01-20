@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pedidos Clientes - ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link th:href="@{/css/pedidos.css}" rel="stylesheet">
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+        </div>
+        <span class="logo-text">ERP</span>
+    </div>
+    <nav>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a th:href="@{/inicio}" class="nav-link">
+                    <i class="bi bi-house-door"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/clientes}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/trabajadores}" class="nav-link">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Trabajadores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/proveedores}" class="nav-link">
+                    <i class="bi bi-truck"></i>
+                    <span>Proveedores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/productos-clientes}" class="nav-link">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Productos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/pedidos-clientes}" class="nav-link active">
+                    <i class="bi bi-cart3"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Header -->
+    <header class="header">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar...">
+        </div>
+        <div class="header-right">
+            <button class="icon-btn">
+                <i class="bi bi-envelope"></i>
+            </button>
+            <button class="icon-btn notification">
+                <i class="bi bi-bell"></i>
+                <span class="badge-notify">3</span>
+            </button>
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <span class="user-name">Antonio</span>
+                    <span class="user-role">Cuenta Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Alertas -->
+    <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${exito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Panel Principal de Pedidos -->
+        <section class="pedidos-panel">
+            <div class="panel-header">
+                <h1 class="panel-title">Pedidos de Clientes</h1>
+            </div>
+
+            <div class="panel-content">
+                <!-- Estadísticas Circulares -->
+                <div class="stats-row">
+                    <div class="stat-circle entregado">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas['porcentajeEntregados'] + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas['porcentajeEntregados'] + '%'}">45%</span>
+                            <span class="stat-label">Entregados</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle enviado">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas['porcentajeEnviados'] + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas['porcentajeEnviados'] + '%'}">25%</span>
+                            <span class="stat-label">Enviados</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle preparando">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas['porcentajePreparando'] + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas['porcentajePreparando'] + '%'}">20%</span>
+                            <span class="stat-label">Preparando</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle espera">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas['porcentajeEnEspera'] + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas['porcentajeEnEspera'] + '%'}">10%</span>
+                            <span class="stat-label">En Espera</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Pedidos -->
+                <div class="table-container">
+                    <table class="pedidos-table">
+                        <thead>
+                        <tr>
+                            <th>
+                                <a th:href="@{/pedidos-clientes(ordenarPor='id', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    ID <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/pedidos-clientes(ordenarPor='fechaPedido', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Fecha <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>Dirección</th>
+                            <th>
+                                <a th:href="@{/pedidos-clientes(ordenarPor='total', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Total <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>Descuento</th>
+                            <th>
+                                <a th:href="@{/pedidos-clientes(ordenarPor='estado', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Estado <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>Productos</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="pedido, iterStat : ${pedidos}">
+                            <td th:text="'#' + ${pedido.id}">#001</td>
+                            <td th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy')}">20/01/2026</td>
+                            <td th:text="${pedido.direccion}">Calle Principal 123</td>
+                            <td class="total-col" th:text="${#numbers.formatDecimal(pedido.total, 0, 'COMMA', 2, 'POINT') + '€'}">1,250.00€</td>
+                            <td th:text="${pedido.descuento != null ? pedido.descuento + '%' : '-'}">10%</td>
+                            <td>
+                                <span class="badge-estado"
+                                      th:classappend="${pedido.estado.name() == 'ENTREGADO' ? 'entregado' : (pedido.estado.name() == 'ENVIADO' ? 'enviado' : (pedido.estado.name() == 'PREPARANDOLO' ? 'preparando' : 'espera'))}"
+                                      th:text="${pedido.estado.displayName}">Entregado</span>
+                            </td>
+                            <td>
+                                <span class="badge-productos" th:text="${#lists.size(pedido.detalles)} + ' items'">3 items</span>
+                            </td>
+                            <td class="acciones">
+                                <a th:href="@{/pedidos-clientes/ver/{id}(id=${pedido.id})}" class="btn-action ver" title="Ver">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/pedidos-clientes/editar/{id}(id=${pedido.id})}" class="btn-action editar" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/pedidos-clientes/eliminar/{id}(id=${pedido.id})}"
+                                   class="btn-action eliminar"
+                                   title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar este pedido?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(pedidos)}">
+                            <td colspan="8" class="text-center py-4">No hay pedidos registrados</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <nav class="pagination-container" th:if="${totalPaginas > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/pedidos-clientes(pagina=${paginaActual - 1}, tamanio=${tamanio})}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                            th:if="${i < 3 || i == totalPaginas - 1 || (i >= paginaActual - 1 && i <= paginaActual + 1)}"
+                            th:classappend="${i == paginaActual} ? 'active'">
+                            <a class="page-link" th:href="@{/pedidos-clientes(pagina=${i}, tamanio=${tamanio})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/pedidos-clientes(pagina=${paginaActual + 1}, tamanio=${tamanio})}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Panel Lateral Derecho -->
+        <aside class="side-panel">
+            <!-- Botones de Acción -->
+            <div class="action-buttons">
+                <a th:href="@{/pedidos-clientes/nuevo}" class="btn-crear">
+                    <i class="bi bi-plus-lg"></i> Crear Pedido
+                </a>
+                <button class="btn-filtrar" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel"></i> Filtrar por Estado
+                </button>
+                <ul class="dropdown-menu dropdown-filtros">
+                    <li><a class="dropdown-item" th:href="@{/pedidos-clientes}">Todos</a></li>
+                    <li><a class="dropdown-item" th:href="@{/pedidos-clientes/filtrar/ENTREGADO}">Entregados</a></li>
+                    <li><a class="dropdown-item" th:href="@{/pedidos-clientes/filtrar/ENVIADO}">Enviados</a></li>
+                    <li><a class="dropdown-item" th:href="@{/pedidos-clientes/filtrar/PREPARANDOLO}">Preparando</a></li>
+                    <li><a class="dropdown-item" th:href="@{/pedidos-clientes/filtrar/EN_ESPERA}">En Espera</a></li>
+                </ul>
+            </div>
+
+            <!-- Total Pedidos y Ventas -->
+            <div class="total-pedidos">
+                <span class="total-numero" th:text="${estadisticas['total']}">245</span>
+                <span class="total-texto">Pedidos Totales</span>
+            </div>
+
+            <div class="total-ventas">
+                <i class="bi bi-currency-euro"></i>
+                <div>
+                    <span class="ventas-numero" th:text="${#numbers.formatDecimal(estadisticas['totalVentas'], 0, 'COMMA', 2, 'POINT')}">45,678.90</span>
+                    <span class="ventas-texto">Total Ventas</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Pedidos Recientes -->
+    <div class="bottom-section">
+        <div class="card-section">
+            <h2 class="section-title">Pedidos Recientes</h2>
+            <table class="mini-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fecha</th>
+                    <th>Dirección</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="pedido : ${pedidosRecientes}">
+                    <td th:text="'#' + ${pedido.id}">#001</td>
+                    <td th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy')}">20/01/2026</td>
+                    <td th:text="${#strings.abbreviate(pedido.direccion, 20)}">Calle Principal...</td>
+                    <td class="total-mini" th:text="${#numbers.formatDecimal(pedido.total, 0, 'COMMA', 2, 'POINT') + '€'}">1,250.00€</td>
+                    <td>
+                        <span class="badge-estado-mini"
+                              th:classappend="${pedido.estado.name() == 'ENTREGADO' ? 'entregado' : (pedido.estado.name() == 'ENVIADO' ? 'enviado' : (pedido.estado.name() == 'PREPARANDOLO' ? 'preparando' : 'espera'))}"
+                              th:text="${pedido.estado.displayName}">Entregado</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

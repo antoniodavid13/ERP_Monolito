@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos Proveedores - ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link th:href="@{/css/productos.css}" rel="stylesheet">
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+            </svg>
+        </div>
+        <span class="logo-text">ERP</span>
+    </div>
+    <nav>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a th:href="@{/inicio}" class="nav-link">
+                    <i class="bi bi-house-door"></i>
+                    <span>Inicio</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/clientes}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Clientes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/trabajadores}" class="nav-link">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Trabajadores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/proveedores}" class="nav-link">
+                    <i class="bi bi-truck"></i>
+                    <span>Proveedores</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/almacenes}" class="nav-link">
+                    <i class="bi bi-box"></i>
+                    <span>Almacenes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/productos-proveedores}" class="nav-link active">
+                    <i class="bi bi-box-seam"></i>
+                    <span>Productos</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a th:href="@{/pedidos}" class="nav-link">
+                    <i class="bi bi-cart3"></i>
+                    <span>Pedidos</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Header -->
+    <header class="header">
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar...">
+        </div>
+        <div class="header-right">
+            <button class="icon-btn">
+                <i class="bi bi-envelope"></i>
+            </button>
+            <button class="icon-btn notification">
+                <i class="bi bi-bell"></i>
+                <span class="badge-notify">3</span>
+            </button>
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <div class="user-name" th:text="${usuario.username}">Usuario</div><span class="user-role">Cuenta Admin</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Alertas -->
+    <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        <span th:text="${exito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Tabs de Navegación -->
+    <div class="tabs-container">
+        <a th:href="@{/productos-clientes}" class="tab-btn">
+            <i class="bi bi-people"></i>
+            Productos Cliente
+        </a>
+        <a th:href="@{/productos-proveedores}" class="tab-btn active">
+            <i class="bi bi-truck"></i>
+            Productos Proveedor
+        </a>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-container">
+        <!-- Panel Principal de Productos -->
+        <section class="productos-panel">
+            <div class="panel-header">
+                <h1 class="panel-title">
+                    <i class="bi bi-truck me-2"></i>
+                    Productos de Proveedores
+                </h1>
+                <div class="search-filter">
+                    <form th:action="@{/productos-proveedores}" method="get" class="search-form">
+                        <input type="text" name="busqueda" th:value="${busqueda}" placeholder="Buscar producto...">
+                        <button type="submit"><i class="bi bi-search"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel-content">
+                <!-- Estadísticas Circulares -->
+                <div class="stats-row">
+                    <div class="stat-circle activo">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas.porcentajeActivos + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas.porcentajeActivos + '%'}">70%</span>
+                            <span class="stat-label">Activos</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle pendiente">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas.porcentajePendientes + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas.porcentajePendientes + '%'}">20%</span>
+                            <span class="stat-label">Pendiente</span>
+                        </div>
+                    </div>
+                    <div class="stat-circle baja">
+                        <svg viewBox="0 0 36 36" class="circular-chart">
+                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                            <path class="circle" th:stroke-dasharray="${estadisticas.porcentajeBajas + ', 100'}" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                        </svg>
+                        <div class="stat-text">
+                            <span class="stat-percent" th:text="${estadisticas.porcentajeBajas + '%'}">10%</span>
+                            <span class="stat-label">Baja</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de Productos Proveedores -->
+                <div class="table-container">
+                    <table class="productos-table">
+                        <thead>
+                        <tr>
+                            <th>
+                                <a th:href="@{/productos-proveedores(ordenarPor='id', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Id <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/productos-proveedores(ordenarPor='nombre', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Nombre <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>
+                                <a th:href="@{/productos-proveedores(ordenarPor='stock', direccion=${direccion == 'asc' ? 'desc' : 'asc'})}">
+                                    Stock <i class="bi bi-arrow-down-up"></i>
+                                </a>
+                            </th>
+                            <th>Precio Lotes</th>
+                            <th>Valor Total</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="producto, iterStat : ${productos}">
+                            <td th:text="${iterStat.index + 1 + (paginaActual * tamanio)}">1.</td>
+                            <td th:text="${producto.nombre}">Lote Semiconductores</td>
+                            <td class="stock-col" th:text="${#numbers.formatInteger(producto.stock, 0, 'COMMA')}">500</td>
+                            <td class="precio-col" th:text="${#numbers.formatDecimal(producto.precioLotes, 0, 'COMMA', 2, 'POINT') + '€'}">150.00€</td>
+                            <td class="valor-total-col"
+                                th:text="${#numbers.formatDecimal(producto.stock * producto.precioLotes, 0, 'COMMA', 2, 'POINT') + '€'}">
+                                75,000.00€
+                            </td>
+                            <td>
+                <span class="badge-estado"
+                      th:classappend="${producto.estado.name() == 'ACTIVO' ? 'activo' : (producto.estado.name() == 'PENDIENTE' ? 'pendiente' : 'baja')}"
+                      th:text="${producto.estado}">Activo</span>
+                            </td>
+                            <td class="acciones">
+                                <a th:href="@{/productos-proveedores/ver/{id}(id=${producto.id})}" class="btn-action ver" title="Ver">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a th:href="@{/productos-proveedores/editar/{id}(id=${producto.id})}" class="btn-action editar" title="Editar">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/productos-proveedores/eliminar/{id}(id=${producto.id})}"
+                                   class="btn-action eliminar"
+                                   title="Eliminar"
+                                   onclick="return confirm('¿Estás seguro de eliminar este producto?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(productos)}">
+                            <td colspan="7" class="text-center py-4">No hay productos registrados</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Paginación -->
+                <nav class="pagination-container" th:if="${totalPaginas > 1}">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${paginaActual == 0} ? 'disabled'">
+                            <a class="page-link" th:href="@{/productos-proveedores(pagina=${paginaActual - 1}, tamanio=${tamanio})}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPaginas - 1)}"
+                            th:if="${i < 3 || i == totalPaginas - 1 || (i >= paginaActual - 1 && i <= paginaActual + 1)}"
+                            th:classappend="${i == paginaActual} ? 'active'">
+                            <a class="page-link" th:href="@{/productos-proveedores(pagina=${i}, tamanio=${tamanio})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${paginaActual == totalPaginas - 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/productos-proveedores(pagina=${paginaActual + 1}, tamanio=${tamanio})}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+
+        <!-- Panel Lateral Derecho -->
+        <aside class="side-panel">
+            <!-- Botones de Acción -->
+            <div class="action-buttons">
+                <a th:href="@{/productos-proveedores/nuevo}" class="btn-crear btn-crear-proveedor">
+                    <i class="bi bi-plus-lg"></i> Crear producto proveedor
+                </a>
+                <button class="btn-filtrar" data-bs-toggle="dropdown">
+                    <i class="bi bi-funnel"></i> Filtrar por estado
+                </button>
+                <ul class="dropdown-menu dropdown-filtros">
+                    <li><a class="dropdown-item" th:href="@{/productos-proveedores}">Todos</a></li>
+                    <li><a class="dropdown-item" th:href="@{/productos-proveedores/filtrar/ACTIVO}">Activos</a></li>
+                    <li><a class="dropdown-item" th:href="@{/productos-proveedores/filtrar/PENDIENTE}">Pendientes</a></li>
+                    <li><a class="dropdown-item" th:href="@{/productos-proveedores/filtrar/BAJA}">Baja</a></li>
+                </ul>
+            </div>
+
+            <!-- Total Productos -->
+            <div class="total-productos">
+                <span class="total-numero" th:text="${estadisticas.total}">75</span>
+                <span class="total-texto">Productos Registrados</span>
+            </div>
+
+            <!-- Valor Total Inventario -->
+            <div class="valor-inventario">
+                <span class="valor-numero" th:text="${#numbers.formatDecimal(estadisticas.valorInventario, 0, 'COMMA', 2, 'POINT')} + '€'">350,000.00€</span>
+                <span class="valor-texto">Valor Total Inventario</span>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Sección Inferior: Top Productos -->
+    <div class="bottom-section">
+        <!-- Top Productos por Precio de Lote -->
+        <div class="card-section">
+            <h2 class="section-title">
+                <i class="bi bi-graph-up-arrow me-2"></i>
+                Top 5 Productos por Precio de Lote
+            </h2>
+            <table class="mini-table">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Stock</th>
+                    <th>Precio Lote</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="producto : ${topProductos}">
+                    <td th:text="${producto.nombre}">Lote Premium</td>
+                    <td class="stock-col" th:text="${#numbers.formatInteger(producto.stock, 0, 'COMMA')}">200</td>
+                    <td class="precio-col" th:text="${#numbers.formatDecimal(producto.precioLotes, 0, 'COMMA', 2, 'POINT') + '€'}">299.99€</td>
+                    <td>
+            <span class="badge-estado-mini"
+                  th:classappend="${producto.estado.name() == 'ACTIVO' ? 'activo' : (producto.estado.name() == 'PENDIENTE' ? 'pendiente' : 'baja')}"
+                  th:text="${producto.estado}">Activo</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(topProductos)}">
+                    <td colspan="4" class="text-center">No hay datos disponibles</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Productos con Mayor Valor -->
+        <div class="card-section">
+            <h2 class="section-title">
+                <i class="bi bi-cash-stack me-2"></i>
+                Productos con Mayor Valor Total
+            </h2>
+            <table class="mini-table">
+                <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Stock</th>
+                    <th>Valor Total</th>
+                    <th>Estado</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="producto : ${topProductos}">
+                    <td th:text="${producto.nombre}">Lote X</td>
+                    <td class="stock-col" th:text="${#numbers.formatInteger(producto.stock, 0, 'COMMA')}">500</td>
+                    <td class="valor-total-col"
+                        th:text="${#numbers.formatDecimal(producto.stock * producto.precioLotes, 0, 'COMMA', 2, 'POINT') + '€'}">
+                        125,000€
+                    </td>
+                    <td>
+            <span class="badge-estado-mini"
+                  th:classappend="${producto.estado.name() == 'ACTIVO' ? 'activo' : (producto.estado.name() == 'PENDIENTE' ? 'pendiente' : 'baja')}"
+                  th:text="${producto.estado}">Activo</span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(topProductos)}">
+                    <td colspan="4" class="text-center">No hay datos disponibles</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
