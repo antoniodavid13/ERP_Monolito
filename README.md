@@ -1,4 +1,4 @@
-# 🚀 ERP Monolith System v1.0
+# 🚀 ERP Monolitica Con CRUD Funcional
 
 Sistema de gestión empresarial integral diseñado bajo una **arquitectura monolítica**. Esta primera versión centraliza las operaciones clave de la empresa con una interfaz moderna y un flujo de datos dinámico.
 
