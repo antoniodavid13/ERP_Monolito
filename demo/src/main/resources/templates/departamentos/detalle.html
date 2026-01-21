@@ -186,7 +186,7 @@
   <nav>
     <ul class="nav-menu">
       <li class="nav-item">
-        <a th:href="@{/inicio}" class="nav-link">
+        <a th:href="@{/dashboard}" class="nav-link">
           <i class="bi bi-house-door"></i>
           <span>Inicio</span>
         </a>
@@ -198,31 +198,53 @@
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/trabajadores}" class="nav-link active">
+        <a th:href="@{/trabajadores}" class="nav-link">
           <i class="bi bi-person-badge"></i>
           <span>Trabajadores</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/proveedores}" class="nav-link">
+        <a th:href="@{/proveedores}" class="nav-link ">
           <i class="bi bi-truck"></i>
           <span>Proveedores</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/productos}" class="nav-link">
+        <a th:href="@{/productos-clientes}" class="nav-link">
           <i class="bi bi-box-seam"></i>
           <span>Productos</span>
         </a>
       </li>
       <li class="nav-item">
-        <a th:href="@{/pedidos}" class="nav-link">
+        <a th:href="@{/pedidos-clientes}" class="nav-link">
           <i class="bi bi-cart3"></i>
           <span>Pedidos</span>
         </a>
       </li>
+      <li class="nav-item">
+        <a th:href="@{/departamentos}" class="nav-link active">
+          <i class="bi bi-building"></i>
+          <span>Departamentos</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a th:href="@{/almacenes}" class="nav-link">
+          <i class="bi bi-building"></i>
+          <span>Almacenes</span>
+        </a>
+      </li>
     </ul>
   </nav>
+  <div class="sidebar-footer" style="margin-top: auto; padding: 20px;">
+    <a th:href="@{/logout}" class="nav-link" style="color: #ef4444;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width: 20px; height: 20px;">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16,17 21,12 16,7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Cerrar Sesión
+    </a>
+  </div>
 </aside>
 
 <!-- Main Content -->
