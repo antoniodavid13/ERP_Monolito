@@ -475,8 +475,12 @@
 
             <div class="form-group">
               <label for="estado">Estado</label>
-              <select id="estado" th:field="*{estado}" required>
-                <option th:each="est : ${estados}" th:value="${est}" th:text="${est.displayName}"></option>
+              <select id="estado" th:field="*{estado}" class="form-control" required>
+                <option value="">-- Seleccionar Estado --</option>
+                <option value="ENTREGADO">Entregado</option>
+                <option value="ENVIADO">Enviado</option>
+                <option value="PREPARANDOLO">Preparando</option>
+                <option value="EN_ESPERA">En Espera</option>
               </select>
             </div>
           </div>

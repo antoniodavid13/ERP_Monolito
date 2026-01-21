@@ -83,12 +83,22 @@
             <div class="user-profile">
                 <div class="user-avatar">AD</div>
                 <div class="user-info">
-                    <span class="user-name">Antonio</span>
+                    <div class="user-name" th:text="${usuario.username}">Usuario</div>
                     <span class="user-role">Cuenta Admin</span>
                 </div>
             </div>
         </div>
     </header>
+    <div class="tabs-container">
+        <a th:href="@{/pedidos-clientes}" class="tab-btn active">
+            <i class="bi bi-people"></i>
+            Pedidos Clientes
+        </a>
+        <a th:href="@{/pedidos-proveedores}" class="tab-btn">
+            <i class="bi bi-truck"></i>
+            Pedidos Proveedores
+        </a>
+    </div>
 
     <!-- Alertas -->
     <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
