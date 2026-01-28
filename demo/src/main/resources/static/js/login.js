@@ -19,13 +19,6 @@ function validateField(e) {
     field.classList.remove('input-error');
 
     switch(fieldId) {
-        case 'usuario':
-            if (value === '') {
-                showError(fieldId, 'El usuario es obligatorio');
-            } else if (value.length < 5) {
-                showError(fieldId, 'El usuario debe tener al menos 5 caracteres');
-            }
-            break;
         case 'correo':
             if (value === '') {
                 showError(fieldId, 'El correo es obligatorio');
@@ -44,15 +37,13 @@ function validateField(e) {
 }
 
 function validateForm() {
-    const usuario = document.getElementById('usuario').value.trim();
     const correo = document.getElementById('correo').value.trim();
     const password = document.getElementById('password').value;
 
-    const isUsuarioValid = usuario.length >= 5;
     const isCorreoValid = correo.includes('@');
     const isPasswordValid = password.length >= 6;
 
-    const allValid = isUsuarioValid && isCorreoValid && isPasswordValid;
+    const allValid = isCorreoValid && isPasswordValid;
 
     btnLogin.disabled = !allValid;
 }

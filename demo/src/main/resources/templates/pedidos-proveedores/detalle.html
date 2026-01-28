@@ -450,14 +450,24 @@
             <th>Total Línea</th>
           </tr>
           </thead>
-          <tbody>
-          <tr th:each="detalle : ${pedido.detalles}">
-            <td th:text="${detalle.productoProveedor.nombre}">Producto A</td>
-            <td th:text="${detalle.cantidad} + ' lotes'">10 lotes</td>
-            <td class="precio-col" th:text="${#numbers.formatDecimal(detalle.productoProveedor.precioLotes, 0, 'COMMA', 2, 'POINT')} + '€'">150.00€</td>
-            <td class="total-col" th:text="${#numbers.formatDecimal(detalle.totalLinea, 0, 'COMMA', 2, 'POINT')} + '€'">1,500.00€</td>
-          </tr>
-          </tbody>
+            <tbody>
+            <tr th:each="detalle : ${pedido.detalles}">
+                <td th:text="${detalle.producto != null ? detalle.producto.nombre : 'Producto no encontrado'}">Producto</td>
+
+                <td th:text="${detalle.cantidad} + ' lotes'">0 lotes</td>
+
+                <td class="precio-col">
+        <span th:if="${detalle.producto != null}"
+              th:text="${#numbers.formatDecimal(detalle.producto.precio, 0, 'COMMA', 2, 'POINT')} + '€'">
+        </span>
+                </td>
+
+                <td class="total-col" th:text="${#numbers.formatDecimal(detalle.totalLinea, 0, 'COMMA', 2, 'POINT')} + '€'">0.00€</td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pedido.detalles)}">
+                <td colspan="4" class="text-center">No hay productos vinculados a este pedido.</td>
+            </tr>
+            </tbody>
         </table>
       </div>
 

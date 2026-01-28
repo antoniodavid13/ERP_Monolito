@@ -225,22 +225,29 @@
             <tbody>
             <tr th:each="pedido, iterStat : ${pedidos}">
               <td th:text="'#' + ${pedido.id}">#001</td>
-              <td th:text="${#temporals.format(pedido.fechaPedido, 'dd/MM/yyyy')}">20/01/2026</td>
-              <td th:text="${pedido.direccion}">Calle Industrial 456</td>
-              <td class="total-col" th:text="${#numbers.formatDecimal(pedido.total, 0, 'COMMA', 2, 'POINT') + '€'}">3,450.00€</td>
+              <td th:text="${pedido.fechaPedido != null ? #temporals.format(pedido.fechaPedido, 'dd/MM/yyyy') : '---'}">20/01/2026</td>
+              <td th:text="${pedido.direccion ?: 'Sin dirección'}">Calle Industrial 456</td>
+              <td class="total-col" th:text="${#numbers.formatDecimal(pedido.total ?: 0, 0, 'COMMA', 2, 'POINT') + '€'}">3,450.00€</td>
               <td>
-                                <span class="badge-prioridad"
-                                      th:classappend="${pedido.prioridad.name() == 'ALTA' ? 'alta' : 'baja'}"
-                                      th:text="${pedido.prioridad.displayName}">Alta</span>
+        <span class="badge-prioridad"
+              th:if="${pedido.prioridad != null}"
+              th:classappend="${pedido.prioridad.name() == 'ALTA' ? 'alta' : 'baja'}"
+              th:text="${pedido.prioridad.displayName}">Alta</span>
               </td>
               <td>
-                                <span class="badge-estado"
-                                      th:classappend="${pedido.estado.name() == 'ENTREGADO' ? 'entregado' : (pedido.estado.name() == 'ENVIADO' ? 'enviado' : (pedido.estado.name() == 'PREPARANDOLO' ? 'preparando' : 'espera'))}"
-                                      th:text="${pedido.estado.displayName}">Entregado</span>
+        <span class="badge-estado"
+              th:if="${pedido.estado != null}"
+              th:classappend="${pedido.estado.name() == 'ENTREGADO' ? 'entregado' : (pedido.estado.name() == 'ENVIADO' ? 'enviado' : (pedido.estado.name() == 'PREPARANDOLO' ? 'preparando' : 'espera'))}"
+              th:text="${pedido.estado.displayName}">Entregado</span>
               </td>
+
               <td>
-                <span class="badge-productos" th:text="${#lists.size(pedido.detalles)} + ' items'">5 items</span>
+                <span class="badge-productos"
+                      th:text="${pedido.detalles != null ? pedido.detalles.size() : 0} + ' items'">
+                    0 items
+                </span>
               </td>
+
               <td class="acciones">
                 <a th:href="@{/pedidos-proveedores/ver/{id}(id=${pedido.id})}" class="btn-action ver" title="Ver">
                   <i class="bi bi-eye"></i>

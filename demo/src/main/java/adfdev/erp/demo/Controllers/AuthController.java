@@ -2,13 +2,15 @@ package adfdev.erp.demo.Controllers;
 
 import adfdev.erp.demo.Usuario;
 import adfdev.erp.demo.database.UserDAO;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.sql.SQLException;
 
@@ -26,16 +28,12 @@ public class AuthController {
 
     @PostMapping("/login")
     public String procesarLogin(
-            @RequestParam("usuario") String usuario,
+            @RequestParam("email") String email,       // Campo 2 del formulario
             @RequestParam("password") String password,
             HttpSession session,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes){
 
         // Validar campos vacíos
-        if (usuario == null || usuario.trim().isEmpty()) {
-            redirectAttributes.addFlashAttribute("error", "El usuario es obligatorio");
-            return "redirect:/login";
-        }
 
         if (password == null || password.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "La contraseña es obligatoria");
@@ -44,23 +42,21 @@ public class AuthController {
 
         try {
             // Intentar iniciar sesión con los datos del formulario
-            Usuario usuarioLogueado = userDAO.iniciarSesion(usuario.trim(), password);
-
+            Usuario usuarioLogueado = userDAO.iniciarSesion(email.trim(), password);
             if (usuarioLogueado != null) {
                 // LOGIN EXITOSO - Guardar usuario en sesión
                 session.setAttribute("usuarioLogueado", usuarioLogueado);
                 return "redirect:/dashboard";
             } else {
                 // LOGIN FALLIDO - Verificar por qué falló
-                boolean existeUsuario = userDAO.existeUsername(usuario.trim());
-                boolean existeEmail = userDAO.existeEmail(usuario.trim());
+                boolean existeEmail = userDAO.existeEmail(email.trim());
 
-                if (!existeUsuario && !existeEmail) {
-                    redirectAttributes.addFlashAttribute("error", "El usuario '" + usuario + "' no existe en el sistema");
+                if (!existeEmail) {
+                    redirectAttributes.addFlashAttribute("error", "El usuario  no existe en el sistema");
                 } else {
-                    redirectAttributes.addFlashAttribute("error", "La contraseña es incorrecta");
+                    redirectAttributes.addFlashAttribute("error", "El correo o la contraseña es incorrecta");
                 }
-                redirectAttributes.addFlashAttribute("usuarioIngresado", usuario);
+                redirectAttributes.addFlashAttribute("usuarioIngresado", email);
                 return "redirect:/login";
             }
         } catch (SQLException e) {
@@ -126,12 +122,13 @@ public class AuthController {
                 return "redirect:/registro";
             }
 
-            // REGISTRAR USUARIO EN LA BASE DE DATOS
-            boolean registrado = userDAO.registrarUsuario(usuario.trim(), correo.trim(), password);
+            String passwordSegura = BCrypt.hashpw(password, BCrypt.gensalt());
+
+            // 3. REGISTRAR con la contraseña encriptada
+            boolean registrado = userDAO.registrarUsuario(usuario.trim(), correo.trim(), passwordSegura);
 
             if (registrado) {
-                // REGISTRO EXITOSO
-                redirectAttributes.addFlashAttribute("exito", "¡Cuenta creada exitosamente! Ya puedes iniciar sesión");
+                redirectAttributes.addFlashAttribute("exito", "¡Cuenta creada exitosamente!");
                 return "redirect:/login";
             } else {
                 redirectAttributes.addFlashAttribute("error", "No se pudo crear la cuenta. Intenta de nuevo");

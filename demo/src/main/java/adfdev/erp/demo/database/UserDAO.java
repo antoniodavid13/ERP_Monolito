@@ -1,6 +1,7 @@
 package adfdev.erp.demo.database;
 
 import adfdev.erp.demo.Usuario;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -33,28 +34,31 @@ public class UserDAO {
      * Busca en la base de datos si existe un usuario con ese username/email y password
      * Retorna el Usuario si las credenciales son correctas, null si no
      */
-    public Usuario iniciarSesion(String usernameOrEmail, String password) throws SQLException {
-        String sql = "SELECT id, username, email FROM usuarios WHERE (username = ? OR email = ?) AND password = ?";
+    public Usuario iniciarSesion(String email, String passwordPlana) throws SQLException {
+        // CORRECCIÓN: Necesitamos traer el 'password' (hash) de la DB para comparar
+        String sql = "SELECT id, username, email, password FROM usuarios WHERE email = ?";
 
         try (Connection conn = database.getConection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, usernameOrEmail);
-            stmt.setString(2, usernameOrEmail);
-            stmt.setString(3, password);
+            stmt.setString(1, email);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    // Usuario encontrado - crear objeto y retornar
-                    Usuario usuario = new Usuario();
-                    usuario.setId(rs.getInt("id"));
-                    usuario.setUsername(rs.getString("username"));
-                    usuario.setEmail(rs.getString("email"));
-                    return usuario;
+                    String passwordHasheadaDB = rs.getString("password");
+
+                    // CORRECCIÓN: Comparamos la clave del formulario con el hash de la DB
+                    if (BCrypt.checkpw(passwordPlana, passwordHasheadaDB)) {
+                        Usuario usuario = new Usuario();
+                        usuario.setId(rs.getInt("id"));
+                        usuario.setUsername(rs.getString("username"));
+                        usuario.setEmail(rs.getString("email"));
+
+                        return usuario; // ¡No olvides retornar el objeto!
+                    }
                 }
             }
         }
-        // No se encontró usuario con esas credenciales
         return null;
     }
 
