@@ -613,6 +613,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script SIN inline para toda la lógica JavaScript -->
 <script>
   let productosSeleccionados = [];
 
@@ -622,136 +624,130 @@
       const nombre = item.getAttribute('data-nombre');
       const precio = parseFloat(item.getAttribute('data-precio'));
       const descuento = parseInt(item.getAttribute('data-descuento'));
-
       agregarProducto(id, nombre, precio, descuento);
   }
 
   function agregarProducto(id, nombre, precio, descuento) {
       const cantidadInput = document.getElementById('cant_' + id);
       const cantidad = parseInt(cantidadInput.value);
-
-      // Verificar si ya existe
-      const existente = productosSeleccionados.find(p => p.id === id);
+      const existente = productosSeleccionados.find(function(p) { return p.id === id; });
       if (existente) {
           existente.cantidad += cantidad;
       } else {
-          productosSeleccionados.push({
-              id: id,
-              nombre: nombre,
-              precio: precio,
-              descuento: descuento,
-              cantidad: cantidad
-          });
+          productosSeleccionados.push({ id: id, nombre: nombre, precio: precio, descuento: descuento, cantidad: cantidad });
       }
-
       renderizarSeleccionados();
       cantidadInput.value = 1;
   }
 
   function eliminarProducto(id) {
-      productosSeleccionados = productosSeleccionados.filter(p => p.id !== id);
+      productosSeleccionados = productosSeleccionados.filter(function(p) { return p.id !== id; });
       renderizarSeleccionados();
   }
 
   function renderizarSeleccionados() {
-      const container = document.getElementById('productosSeleccionados');
-      const totalPedidoDiv = document.getElementById('totalPedido');
-      const btnSubmit = document.getElementById('btnSubmit');
+      var container = document.getElementById('productosSeleccionados');
+      var totalPedidoDiv = document.getElementById('totalPedido');
+      var btnSubmit = document.getElementById('btnSubmit');
 
       if (productosSeleccionados.length === 0) {
-          container.innerHTML = `
-              <div class="empty-state">
-                  <i class="bi bi-cart-x"></i>
-                  <p>No hay productos seleccionados</p>
-              </div>
-          `;
+          container.innerHTML = '<div class="empty-state"><i class="bi bi-cart-x"></i><p>No hay productos seleccionados</p></div>';
           totalPedidoDiv.style.display = 'none';
           btnSubmit.disabled = true;
           return;
       }
 
-      let html = '';
-      let totalGeneral = 0;
+      var html = '';
+      var totalGeneral = 0;
 
-      productosSeleccionados.forEach(producto => {
-          const subtotal = producto.precio * producto.cantidad;
-          const descuentoAplicado = subtotal * (producto.descuento / 100);
-          const total = subtotal - descuentoAplicado;
+      productosSeleccionados.forEach(function(producto) {
+          var subtotal = producto.precio * producto.cantidad;
+          var descuentoAplicado = subtotal * (producto.descuento / 100);
+          var total = subtotal - descuentoAplicado;
           totalGeneral += total;
 
-          html += `
-              <div class="seleccionado-item">
-                  <div class="seleccionado-info">
-                      <div class="seleccionado-nombre">${producto.nombre}</div>
-                      <div class="seleccionado-precio">${producto.precio.toFixed(2)}€ × ${producto.cantidad} ${producto.descuento > 0 ? '(-' + producto.descuento + '%)' : ''}</div>
-                  </div>
-                  <span class="seleccionado-cantidad">${producto.cantidad} uds</span>
-                  <span class="seleccionado-total">${total.toFixed(2)}€</span>
-                  <button type="button" class="btn-remove" onclick="eliminarProducto(${producto.id})">
-                      <i class="bi bi-x"></i>
-                  </button>
-              </div>
-          `;
+          html += '<div class="seleccionado-item">'
+              + '<div class="seleccionado-info">'
+              + '<div class="seleccionado-nombre">' + producto.nombre + '</div>'
+              + '<div class="seleccionado-precio">' + producto.precio.toFixed(2) + '€ × ' + producto.cantidad + (producto.descuento > 0 ? ' (-' + producto.descuento + '%)' : '') + '</div>'
+              + '</div>'
+              + '<span class="seleccionado-cantidad">' + producto.cantidad + ' uds</span>'
+              + '<span class="seleccionado-total">' + total.toFixed(2) + '€</span>'
+              + '<button type="button" class="btn-remove" onclick="eliminarProducto(' + producto.id + ')">'
+              + '<i class="bi bi-x"></i></button>'
+              + '</div>';
       });
 
       container.innerHTML = html;
 
-      // Mostrar total
-      const descuentoPedido = parseInt(document.getElementById('descuento').value) || 0;
-      const descuentoPedidoMonto = totalGeneral * (descuentoPedido / 100);
-      const totalFinal = totalGeneral - descuentoPedidoMonto;
+      var descuentoPedido = parseInt(document.getElementById('descuento').value) || 0;
+      var descuentoPedidoMonto = totalGeneral * (descuentoPedido / 100);
+      var totalFinal = totalGeneral - descuentoPedidoMonto;
 
       document.getElementById('totalMonto').textContent = totalFinal.toFixed(2) + '€';
       totalPedidoDiv.style.display = 'flex';
       btnSubmit.disabled = false;
   }
 
-  // Actualizar total cuando cambie el descuento del pedido
   document.getElementById('descuento').addEventListener('input', renderizarSeleccionados);
 
-  // Al enviar el formulario, agregar campos hidden con los productos
   document.getElementById('formPedido').addEventListener('submit', function(e) {
       if (productosSeleccionados.length === 0) {
           e.preventDefault();
           alert('Debe seleccionar al menos un producto');
           return;
       }
+      var oldInputs = this.querySelectorAll('.producto-hidden');
+      oldInputs.forEach(function(input) { input.remove(); });
 
-      // Limpiar inputs anteriores
-      const oldInputs = this.querySelectorAll('.producto-hidden');
-      oldInputs.forEach(input => input.remove());
-
-      // Agregar nuevos inputs
-      productosSeleccionados.forEach((producto, index) => {
-          const inputId = document.createElement('input');
+      var form = this;
+      productosSeleccionados.forEach(function(producto) {
+          var inputId = document.createElement('input');
           inputId.type = 'hidden';
           inputId.name = 'productosIds';
           inputId.value = producto.id;
           inputId.className = 'producto-hidden';
-          this.appendChild(inputId);
+          form.appendChild(inputId);
 
-          const inputCantidad = document.createElement('input');
+          var inputCantidad = document.createElement('input');
           inputCantidad.type = 'hidden';
           inputCantidad.name = 'cantidades';
           inputCantidad.value = producto.cantidad;
           inputCantidad.className = 'producto-hidden';
-          this.appendChild(inputCantidad);
+          form.appendChild(inputCantidad);
       });
   });
 
   function filtrarProductos() {
-      const search = document.getElementById('searchProducto').value.toLowerCase();
-      const items = document.querySelectorAll('.producto-item');
-
-      items.forEach(item => {
-          const nombre = item.querySelector('.producto-nombre').textContent.toLowerCase();
-          if (nombre.includes(search)) {
-              item.style.display = 'flex';
-          } else {
-              item.style.display = 'none';
-          }
+      var search = document.getElementById('searchProducto').value.toLowerCase();
+      var items = document.querySelectorAll('.producto-item');
+      items.forEach(function(item) {
+          var nombre = item.querySelector('.producto-nombre').textContent.toLowerCase();
+          item.style.display = nombre.includes(search) ? 'flex' : 'none';
       });
   }
+</script>
+
+<!-- Script CON inline SOLO para cargar datos de Thymeleaf al editar -->
+<script th:inline="javascript">
+  window.onload = function() {
+      var esEdicion = /*[[${accion == 'editar'}]]*/ false;
+      if (esEdicion) {
+          var detallesExistentes = [];
+          /*[# th:each="detalle : ${pedido.detalles}"]*/
+          detallesExistentes.push({
+              id: /*[[${detalle.productoCliente.id}]]*/ 0,
+              nombre: /*[[${detalle.productoCliente.nombre}]]*/ '',
+              precio: /*[[${detalle.productoCliente.precioUnitario}]]*/ 0,
+              descuento: /*[[${detalle.productoCliente.descuento ?: 0}]]*/ 0,
+              cantidad: /*[[${detalle.cantidad}]]*/ 0
+          });
+          /*[/]*/
+
+          productosSeleccionados = detallesExistentes;
+          renderizarSeleccionados();
+      }
+  };
 </script>
 </body>
 </html>

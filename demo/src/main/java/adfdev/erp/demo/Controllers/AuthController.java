@@ -1,8 +1,8 @@
 package adfdev.erp.demo.Controllers;
 
+import adfdev.erp.demo.HashUtil;
 import adfdev.erp.demo.Usuario;
 import adfdev.erp.demo.database.UserDAO;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,12 +28,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public String procesarLogin(
-            @RequestParam("email") String email,       // Campo 2 del formulario
+            @RequestParam("email") String email,
             @RequestParam("password") String password,
             HttpSession session,
             RedirectAttributes redirectAttributes){
-
-        // Validar campos vacíos
 
         if (password == null || password.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "La contraseña es obligatoria");
@@ -41,18 +39,21 @@ public class AuthController {
         }
 
         try {
-            // Intentar iniciar sesión con los datos del formulario
-            Usuario usuarioLogueado = userDAO.iniciarSesion(email.trim(), password);
+            // --- LA PIEZA QUE FALTABA ---
+            // Convertimos la contraseña del formulario a SHA-256
+            String passwordHasheada = HashUtil.sha256(password);
+
+            // Ahora enviamos 'passwordHasheada' al DAO en lugar de 'password'
+            Usuario usuarioLogueado = userDAO.iniciarSesion(email.trim(), passwordHasheada);
+            // ----------------------------
+
             if (usuarioLogueado != null) {
-                // LOGIN EXITOSO - Guardar usuario en sesión
                 session.setAttribute("usuarioLogueado", usuarioLogueado);
                 return "redirect:/dashboard";
             } else {
-                // LOGIN FALLIDO - Verificar por qué falló
                 boolean existeEmail = userDAO.existeEmail(email.trim());
-
                 if (!existeEmail) {
-                    redirectAttributes.addFlashAttribute("error", "El usuario  no existe en el sistema");
+                    redirectAttributes.addFlashAttribute("error", "El usuario no existe en el sistema");
                 } else {
                     redirectAttributes.addFlashAttribute("error", "El correo o la contraseña es incorrecta");
                 }
@@ -61,11 +62,10 @@ public class AuthController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Error de conexión con la base de datos: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error de base de datos: " + e.getMessage());
             return "redirect:/login";
         }
     }
-
     // ==================== REGISTRO ====================
 
     @GetMapping("/registro")
@@ -122,9 +122,9 @@ public class AuthController {
                 return "redirect:/registro";
             }
 
-            String passwordSegura = BCrypt.hashpw(password, BCrypt.gensalt());
+// Antes: String passwordSegura = BCrypt.hashpw(password, BCrypt.gensalt());
+            String passwordSegura = HashUtil.sha256(password);
 
-            // 3. REGISTRAR con la contraseña encriptada
             boolean registrado = userDAO.registrarUsuario(usuario.trim(), correo.trim(), passwordSegura);
 
             if (registrado) {

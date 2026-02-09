@@ -654,6 +654,8 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script SIN inline para toda la lógica JavaScript -->
 <script>
   let productosSeleccionados = [];
 
@@ -662,27 +664,18 @@
       const id = parseInt(item.getAttribute('data-id'));
       const nombre = item.getAttribute('data-nombre');
       const precio = parseFloat(item.getAttribute('data-precio'));
-
       agregarProducto(id, nombre, precio);
   }
 
   function agregarProducto(id, nombre, precio) {
       const cantidadInput = document.getElementById('cant_' + id);
       const cantidad = parseInt(cantidadInput.value);
-
-      // Verificar si ya existe
       const existente = productosSeleccionados.find(p => p.id === id);
       if (existente) {
           existente.cantidad += cantidad;
       } else {
-          productosSeleccionados.push({
-              id: id,
-              nombre: nombre,
-              precio: precio,
-              cantidad: cantidad
-          });
+          productosSeleccionados.push({ id, nombre, precio, cantidad });
       }
-
       renderizarSeleccionados();
       cantidadInput.value = 1;
   }
@@ -698,12 +691,7 @@
       const btnSubmit = document.getElementById('btnSubmit');
 
       if (productosSeleccionados.length === 0) {
-          container.innerHTML = `
-              <div class="empty-state">
-                  <i class="bi bi-cart-x"></i>
-                  <p>No hay productos seleccionados</p>
-              </div>
-          `;
+          container.innerHTML = '<div class="empty-state"><i class="bi bi-cart-x"></i><p>No hay productos seleccionados</p></div>';
           totalPedidoDiv.style.display = 'none';
           btnSubmit.disabled = true;
           return;
@@ -712,23 +700,19 @@
       let html = '';
       let totalGeneral = 0;
 
-      productosSeleccionados.forEach(producto => {
+      productosSeleccionados.forEach(function(producto) {
           const total = producto.precio * producto.cantidad;
           totalGeneral += total;
-
-          html += `
-              <div class="seleccionado-item">
-                  <div class="seleccionado-info">
-                      <div class="seleccionado-nombre">${producto.nombre}</div>
-                      <div class="seleccionado-precio">${producto.precio.toFixed(2)}€ × ${producto.cantidad} lotes</div>
-                  </div>
-                  <span class="seleccionado-cantidad">${producto.cantidad} lotes</span>
-                  <span class="seleccionado-total">${total.toFixed(2)}€</span>
-                  <button type="button" class="btn-remove" onclick="eliminarProducto(${producto.id})">
-                      <i class="bi bi-x"></i>
-                  </button>
-              </div>
-          `;
+          html += '<div class="seleccionado-item">'
+              + '<div class="seleccionado-info">'
+              + '<div class="seleccionado-nombre">' + producto.nombre + '</div>'
+              + '<div class="seleccionado-precio">' + producto.precio.toFixed(2) + '€ × ' + producto.cantidad + ' lotes</div>'
+              + '</div>'
+              + '<span class="seleccionado-cantidad">' + producto.cantidad + ' lotes</span>'
+              + '<span class="seleccionado-total">' + total.toFixed(2) + '€</span>'
+              + '<button type="button" class="btn-remove" onclick="eliminarProducto(' + producto.id + ')">'
+              + '<i class="bi bi-x"></i></button>'
+              + '</div>';
       });
 
       container.innerHTML = html;
@@ -737,20 +721,16 @@
       btnSubmit.disabled = false;
   }
 
-  // Al enviar el formulario, agregar campos hidden con los productos
   document.getElementById('formPedido').addEventListener('submit', function(e) {
       if (productosSeleccionados.length === 0) {
           e.preventDefault();
           alert('Debe seleccionar al menos un producto');
           return;
       }
-
-      // Limpiar inputs anteriores
       const oldInputs = this.querySelectorAll('.producto-hidden');
-      oldInputs.forEach(input => input.remove());
+      oldInputs.forEach(function(input) { input.remove(); });
 
-      // Agregar nuevos inputs
-      productosSeleccionados.forEach((producto, index) => {
+      productosSeleccionados.forEach(function(producto) {
           const inputId = document.createElement('input');
           inputId.type = 'hidden';
           inputId.name = 'productosIds';
@@ -764,29 +744,22 @@
           inputCantidad.value = producto.cantidad;
           inputCantidad.className = 'producto-hidden';
           this.appendChild(inputCantidad);
-      });
+      }.bind(this));
   });
 
   function filtrarProductos() {
       const search = document.getElementById('searchProducto').value.toLowerCase();
       const items = document.querySelectorAll('.producto-item');
-
-      items.forEach(item => {
+      items.forEach(function(item) {
           const nombre = item.querySelector('.producto-nombre').textContent.toLowerCase();
-          if (nombre.includes(search)) {
-              item.style.display = 'flex';
-          } else {
-              item.style.display = 'none';
-          }
+          item.style.display = nombre.includes(search) ? 'flex' : 'none';
       });
   }
 
   function actualizarBadgePrioridad() {
       const select = document.getElementById('prioridad');
       const badge = document.getElementById('badgePrioridad');
-      const value = select.value;
-
-      if (value === 'ALTA') {
+      if (select.value === 'ALTA') {
           badge.className = 'badge-prioridad-selector alta';
           badge.innerHTML = '<i class="bi bi-exclamation-triangle"></i><span>Prioridad ALTA - Urgente</span>';
       } else {
@@ -794,10 +767,28 @@
           badge.innerHTML = '<i class="bi bi-info-circle"></i><span>Prioridad Normal</span>';
       }
   }
+</script>
 
-  // Inicializar badge de prioridad
+<!-- Script CON inline SOLO para cargar datos de Thymeleaf -->
+<script th:inline="javascript">
   window.onload = function() {
       actualizarBadgePrioridad();
+
+      var esEdicion = /*[[${accion == 'editar'}]]*/ false;
+      if (esEdicion) {
+          var detallesExistentes = [];
+          /*[# th:each="detalle : ${pedido.detalles}"]*/
+          detallesExistentes.push({
+              id: /*[[${detalle.productoProveedor.id}]]*/ 0,
+              nombre: /*[[${detalle.productoProveedor.nombre}]]*/ '',
+              precio: /*[[${detalle.productoProveedor.precioLotes}]]*/ 0,
+              cantidad: /*[[${detalle.cantidad}]]*/ 0
+          });
+          /*[/]*/
+
+          productosSeleccionados = detallesExistentes;
+          renderizarSeleccionados();
+      }
   };
 </script>
 </body>

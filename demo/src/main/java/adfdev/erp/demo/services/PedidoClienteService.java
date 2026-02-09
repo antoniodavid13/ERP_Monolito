@@ -66,8 +66,21 @@ public class PedidoClienteService {
         pedido.calcularTotal();
 
         // Guardar pedido
-        return pedidoClienteRepository.save(pedido);
+        PedidoCliente pedidoGuardado = pedidoClienteRepository.save(pedido);
+
+        // Restar stock de los productos (venta a cliente)
+        for (DetallePedidoCliente detalle : pedidoGuardado.getDetalles()) {
+            ProductoCliente producto = detalle.getProductoCliente();
+            producto.setStock(producto.getStock() - detalle.getCantidad());
+            productoClienteRepository.save(producto);
+        }
+
+        return pedidoGuardado;
     }
+
+/**
+ * Actualizar pedido existente
+ */
 
     /**
      * Actualizar pedido existente
@@ -85,6 +98,13 @@ public class PedidoClienteService {
                     pedido.setIdAlmacen(pedidoActualizado.getIdAlmacen());
                     pedido.setIdMetodoEnvio(pedidoActualizado.getIdMetodoEnvio());
 
+                    // Devolver stock de los detalles antiguos (sumar)
+                    for (DetallePedidoCliente detalleAntiguo : pedido.getDetalles()) {
+                        ProductoCliente producto = detalleAntiguo.getProductoCliente();
+                        producto.setStock(producto.getStock() + detalleAntiguo.getCantidad());
+                        productoClienteRepository.save(producto);
+                    }
+
                     // Limpiar detalles antiguos
                     pedido.getDetalles().clear();
 
@@ -96,8 +116,19 @@ public class PedidoClienteService {
                         ProductoCliente producto = productoClienteRepository.findById(idProducto)
                                 .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + idProducto));
 
+                        if (producto.getStock() < cantidad) {
+                            throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
+                        }
+
                         DetallePedidoCliente detalle = new DetallePedidoCliente(pedido, producto, cantidad);
                         pedido.addDetalle(detalle);
+                    }
+
+                    // Restar stock de los nuevos detalles
+                    for (DetallePedidoCliente detalleNuevo : pedido.getDetalles()) {
+                        ProductoCliente producto = detalleNuevo.getProductoCliente();
+                        producto.setStock(producto.getStock() - detalleNuevo.getCantidad());
+                        productoClienteRepository.save(producto);
                     }
 
                     // Recalcular total
@@ -119,9 +150,16 @@ public class PedidoClienteService {
     }
 
     public void eliminarPedidoCliente(Long id) {
-        if (!pedidoClienteRepository.existsById(id)) {
-            throw new RuntimeException("Pedido no encontrado con id: " + id);
+        PedidoCliente pedido = pedidoClienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
+
+        // Devolver stock de los productos al eliminar el pedido
+        for (DetallePedidoCliente detalle : pedido.getDetalles()) {
+            ProductoCliente producto = detalle.getProductoCliente();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoClienteRepository.save(producto);
         }
+
         pedidoClienteRepository.deleteById(id);
     }
 

@@ -46,7 +46,7 @@ public class PedidoCliente {
     private Long idMetodoEnvio;
 
     // Relación con detalles del pedido
-    @OneToMany(mappedBy = "pedidoCliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "pedidoCliente", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<DetallePedidoCliente> detalles = new ArrayList<>();
 
     // Enum para estados del pedido

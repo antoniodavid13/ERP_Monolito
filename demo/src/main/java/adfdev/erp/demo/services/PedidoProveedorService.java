@@ -67,7 +67,16 @@ public class PedidoProveedorService {
         pedido.calcularTotal();
 
         // Guardar pedido
-        return pedidoProveedorRepository.save(pedido);
+        PedidoProveedor pedidoGuardado = pedidoProveedorRepository.save(pedido);
+
+        // Actualizar stock de los productos (sumar porque es compra a proveedor)
+        for (DetallePedidoProveedor detalle : pedidoGuardado.getDetalles()) {
+            ProductoProveedor producto = detalle.getProductoProveedor();
+            producto.setStock(producto.getStock() + detalle.getCantidad());
+            productoProveedorRepository.save(producto);
+        }
+
+        return pedidoGuardado;
     }
 
     /**
@@ -87,6 +96,14 @@ public class PedidoProveedorService {
                     pedido.setIdAlmacen(pedidoActualizado.getIdAlmacen());
                     pedido.setIdMetodoEnvio(pedidoActualizado.getIdMetodoEnvio());
 
+                    // Restar stock de los detalles antiguos
+                    for (DetallePedidoProveedor detalleAntiguo : pedido.getDetalles()) {
+                        ProductoProveedor producto = detalleAntiguo.getProductoProveedor();
+                        int nuevoStock = producto.getStock() - detalleAntiguo.getCantidad();
+                        producto.setStock(Math.max(nuevoStock, 0));
+                        productoProveedorRepository.save(producto);
+                    }
+
                     // Limpiar detalles antiguos
                     pedido.getDetalles().clear();
 
@@ -100,6 +117,13 @@ public class PedidoProveedorService {
 
                         DetallePedidoProveedor detalle = new DetallePedidoProveedor(pedido, producto, cantidad);
                         pedido.addDetalle(detalle);
+                    }
+
+                    // Sumar stock de los nuevos detalles
+                    for (DetallePedidoProveedor detalleNuevo : pedido.getDetalles()) {
+                        ProductoProveedor producto = detalleNuevo.getProductoProveedor();
+                        producto.setStock(producto.getStock() + detalleNuevo.getCantidad());
+                        productoProveedorRepository.save(producto);
                     }
 
                     // Recalcular total
@@ -121,9 +145,17 @@ public class PedidoProveedorService {
     }
 
     public void eliminarPedidoProveedor(Long id) {
-        if (!pedidoProveedorRepository.existsById(id)) {
-            throw new RuntimeException("Pedido no encontrado con id: " + id);
+        PedidoProveedor pedido = pedidoProveedorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
+
+        // Restar stock de los productos al eliminar el pedido
+        for (DetallePedidoProveedor detalle : pedido.getDetalles()) {
+            ProductoProveedor producto = detalle.getProductoProveedor();
+            int nuevoStock = producto.getStock() - detalle.getCantidad();
+            producto.setStock(Math.max(nuevoStock, 0));
+            productoProveedorRepository.save(producto);
         }
+
         pedidoProveedorRepository.deleteById(id);
     }
 
