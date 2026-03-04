@@ -2,8 +2,10 @@ package adfdev.erp.demo.Controllers;
 
 import adfdev.erp.demo.ProductoCliente;
 import adfdev.erp.demo.ProductoCliente.EstadoProducto;
+import adfdev.erp.demo.ProductoProveedor;
 import adfdev.erp.demo.services.ProductoClienteservice;
-import adfdev.erp.demo.services.Almacenservice;
+import adfdev.erp.demo.services.Escandalloservice;
+import adfdev.erp.demo.services.ProductoProveedorservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
@@ -11,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -19,6 +23,12 @@ public class ProductoClienteController {
 
     @Autowired
     private ProductoClienteservice productoClienteService;
+
+    @Autowired
+    private Escandalloservice escandalloService;
+
+    @Autowired
+    private ProductoProveedorservice productoProveedorService;
 
     /**
      * Listar todos los productos de clientes
@@ -66,20 +76,33 @@ public class ProductoClienteController {
         productoNuevo.setEstado(EstadoProducto.ACTIVO);
         model.addAttribute("producto", productoNuevo);
         model.addAttribute("estados", EstadoProducto.values());
+        model.addAttribute("productosProveedor", productoProveedorService
+                .obtenerPorEstado(ProductoProveedor.EstadoProducto.ACTIVO));
+        model.addAttribute("lineasEscandallo", List.of());
         model.addAttribute("titulo", "Crear Producto Cliente");
         model.addAttribute("accion", "crear");
         return "productos-clientes/formulario";
     }
 
     /**
-     * Procesar creación
+     * Procesar creación con escandallo
      */
     @PostMapping("/crear")
     public String crearProductoCliente(@ModelAttribute ProductoCliente producto,
+                                       @RequestParam(value = "escandalloIds", required = false) List<Long> escandalloIds,
+                                       @RequestParam(value = "escandalloCantidades", required = false) List<BigDecimal> escandalloCantidades,
                                        RedirectAttributes redirectAttributes) {
         try {
-            productoClienteService.crearProductoCliente(producto);
-            redirectAttributes.addFlashAttribute("exito", "Producto creado exitosamente");
+            ProductoCliente creado = productoClienteService.crearProductoCliente(producto);
+
+            // Guardar líneas de escandallo si las hay
+            if (escandalloIds != null && !escandalloIds.isEmpty()) {
+                for (int i = 0; i < escandalloIds.size(); i++) {
+                    escandalloService.agregarLinea(creado.getId(), escandalloIds.get(i), escandalloCantidades.get(i));
+                }
+            }
+
+            redirectAttributes.addFlashAttribute("exito", "Producto creado con escandallo exitosamente");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/productos-clientes/nuevo";
@@ -88,7 +111,7 @@ public class ProductoClienteController {
     }
 
     /**
-     * Mostrar formulario para editar
+     * Mostrar formulario para editar con escandallo existente
      */
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable Long id, Model model,
@@ -97,6 +120,10 @@ public class ProductoClienteController {
                 .map(producto -> {
                     model.addAttribute("producto", producto);
                     model.addAttribute("estados", EstadoProducto.values());
+                    model.addAttribute("productosProveedor", productoProveedorService
+                            .obtenerPorEstado(ProductoProveedor.EstadoProducto.ACTIVO));
+                    model.addAttribute("lineasEscandallo", escandalloService
+                            .obtenerPorProductoCliente(id));
                     model.addAttribute("titulo", "Editar Producto Cliente");
                     model.addAttribute("accion", "editar");
                     return "productos-clientes/formulario";
@@ -108,14 +135,25 @@ public class ProductoClienteController {
     }
 
     /**
-     * Procesar actualización
+     * Procesar actualización con reemplazo de escandallo
      */
     @PostMapping("/actualizar/{id}")
     public String actualizarProductoCliente(@PathVariable Long id,
                                             @ModelAttribute ProductoCliente producto,
+                                            @RequestParam(value = "escandalloIds", required = false) List<Long> escandalloIds,
+                                            @RequestParam(value = "escandalloCantidades", required = false) List<BigDecimal> escandalloCantidades,
                                             RedirectAttributes redirectAttributes) {
         try {
             productoClienteService.actualizarProductoCliente(id, producto);
+
+            // Reemplazar escandallo: eliminar antiguo y crear nuevo
+            escandalloService.eliminarTodosPorProductoCliente(id);
+            if (escandalloIds != null && !escandalloIds.isEmpty()) {
+                for (int i = 0; i < escandalloIds.size(); i++) {
+                    escandalloService.agregarLinea(id, escandalloIds.get(i), escandalloCantidades.get(i));
+                }
+            }
+
             redirectAttributes.addFlashAttribute("exito", "Producto actualizado exitosamente");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -148,6 +186,8 @@ public class ProductoClienteController {
         return productoClienteService.obtenerPorId(id)
                 .map(producto -> {
                     model.addAttribute("producto", producto);
+                    model.addAttribute("lineasEscandallo", escandalloService
+                            .obtenerPorProductoCliente(id));
                     return "productos-clientes/detalle";
                 })
                 .orElseGet(() -> {

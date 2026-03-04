@@ -89,7 +89,6 @@
         box-shadow: 0 0 0 3px rgba(57, 217, 217, 0.1);
     }
 
-    /* Selector de Productos */
     .productos-selector {
         background: var(--bg-card-secondary);
         border: 1px solid var(--border-color);
@@ -176,7 +175,6 @@
         box-shadow: 0 4px 12px rgba(57, 217, 217, 0.3);
     }
 
-    /* Productos Seleccionados */
     .productos-seleccionados {
         background: var(--bg-card-secondary);
         border: 1px solid var(--border-color);
@@ -352,10 +350,56 @@
         margin-bottom: 16px;
         opacity: 0.5;
     }
+
+    /* Tabla solo lectura para edición */
+    .readonly-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .readonly-table th {
+        text-align: left;
+        padding: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        background: var(--bg-card-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .readonly-table td {
+        padding: 14px 12px;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .readonly-table .precio-col {
+        color: var(--accent-cyan);
+    }
+
+    .readonly-table .total-col {
+        color: var(--accent-green);
+        font-weight: 600;
+    }
+
+    .lock-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(163, 113, 247, 0.15);
+        color: var(--accent-purple);
+        margin-left: 8px;
+    }
   </style>
 </head>
 <body>
-<!-- Sidebar (igual que la lista) -->
+<!-- Sidebar -->
 <aside class="sidebar">
   <div class="logo">
     <div class="logo-icon">
@@ -369,54 +413,14 @@
   </div>
   <nav>
     <ul class="nav-menu">
-      <li class="nav-item">
-        <a th:href="@{/dashboard}" class="nav-link">
-          <i class="bi bi-house-door"></i>
-          <span>Inicio</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/clientes}" class="nav-link">
-          <i class="bi bi-people"></i>
-          <span>Clientes</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/trabajadores}" class="nav-link">
-          <i class="bi bi-person-badge"></i>
-          <span>Trabajadores</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/proveedores}" class="nav-link ">
-          <i class="bi bi-truck"></i>
-          <span>Proveedores</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/productos-clientes}" class="nav-link">
-          <i class="bi bi-box-seam"></i>
-          <span>Productos</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/pedidos-clientes}" class="nav-link active">
-          <i class="bi bi-cart3"></i>
-          <span>Pedidos</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/departamentos}" class="nav-link">
-          <i class="bi bi-building"></i>
-          <span>Departamentos</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a th:href="@{/almacenes}" class="nav-link">
-          <i class="bi bi-building"></i>
-          <span>Almacenes</span>
-        </a>
-      </li>
+      <li class="nav-item"><a th:href="@{/dashboard}" class="nav-link"><i class="bi bi-house-door"></i><span>Inicio</span></a></li>
+      <li class="nav-item"><a th:href="@{/clientes}" class="nav-link"><i class="bi bi-people"></i><span>Clientes</span></a></li>
+      <li class="nav-item"><a th:href="@{/trabajadores}" class="nav-link"><i class="bi bi-person-badge"></i><span>Trabajadores</span></a></li>
+      <li class="nav-item"><a th:href="@{/proveedores}" class="nav-link"><i class="bi bi-truck"></i><span>Proveedores</span></a></li>
+      <li class="nav-item"><a th:href="@{/productos-clientes}" class="nav-link"><i class="bi bi-box-seam"></i><span>Productos</span></a></li>
+      <li class="nav-item"><a th:href="@{/pedidos-clientes}" class="nav-link active"><i class="bi bi-cart3"></i><span>Pedidos</span></a></li>
+      <li class="nav-item"><a th:href="@{/departamentos}" class="nav-link"><i class="bi bi-building"></i><span>Departamentos</span></a></li>
+      <li class="nav-item"><a th:href="@{/almacenes}" class="nav-link"><i class="bi bi-building"></i><span>Almacenes</span></a></li>
     </ul>
   </nav>
   <div class="sidebar-footer" style="margin-top: auto; padding: 20px;">
@@ -450,7 +454,9 @@
         <i class="bi bi-cart-plus"></i>
       </div>
       <h1 class="form-title" th:text="${titulo}">Crear Pedido Cliente</h1>
-      <p class="form-subtitle">Complete la información del pedido y seleccione los productos</p>
+      <p class="form-subtitle" th:text="${accion == 'crear' ? 'Complete la información del pedido y seleccione los productos' : 'Modifique los datos generales del pedido'}">
+        Complete la información del pedido
+      </p>
 
       <form th:action="${accion == 'crear'} ? @{/pedidos-clientes/crear} : @{/pedidos-clientes/actualizar/{id}(id=${pedido.id})}"
             th:object="${pedido}"
@@ -544,8 +550,10 @@
           </div>
         </div>
 
-        <!-- SECCIÓN 2: Selector de Productos -->
-        <div class="form-section">
+        <!-- ============================================================ -->
+        <!-- SECCIÓN 2A: Selector de Productos (SOLO AL CREAR) -->
+        <!-- ============================================================ -->
+        <div class="form-section" th:if="${accion == 'crear'}">
           <h3 class="form-section-title">Productos del Pedido</h3>
 
           <div class="productos-selector">
@@ -569,7 +577,6 @@
                          class="cantidad-input"
                          th:id="'cant_' + ${producto.id}"
                          min="1"
-                         th:max="${producto.stock}"
                          value="1">
                   <button type="button"
                           class="btn-add-producto"
@@ -601,9 +608,50 @@
           </div>
         </div>
 
+        <!-- ============================================================ -->
+        <!-- SECCIÓN 2B: Productos Solo Lectura (AL EDITAR) -->
+        <!-- ============================================================ -->
+        <div class="form-section" th:if="${accion == 'editar'}">
+          <h3 class="form-section-title">
+            <i class="bi bi-lock me-2"></i>Productos del Pedido
+            <span class="lock-badge"><i class="bi bi-lock-fill"></i> No editable</span>
+          </h3>
+
+          <div class="productos-seleccionados">
+            <table class="readonly-table">
+              <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unit.</th>
+                <th>Subtotal</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="detalle : ${pedido.detalles}">
+                <td th:text="${detalle.productoCliente.nombre}">Producto</td>
+                <td th:text="${detalle.cantidad}">1</td>
+                <td class="precio-col"
+                    th:text="${detalle.productoCliente.precioUnitario != null ? #numbers.formatDecimal(detalle.productoCliente.precioUnitario, 0, 'COMMA', 2, 'POINT') + '€' : '0,00€'}">0,00€</td>
+                <td class="total-col"
+                    th:text="${detalle.productoCliente.precioUnitario != null ? #numbers.formatDecimal(detalle.cantidad * detalle.productoCliente.precioUnitario, 0, 'COMMA', 2, 'POINT') + '€' : '0,00€'}">0,00€</td>
+              </tr>
+              <tr th:if="${pedido.detalles == null || #lists.isEmpty(pedido.detalles)}">
+                <td colspan="4" class="text-center" style="padding: 24px; color: var(--text-secondary);">Sin productos</td>
+              </tr>
+              </tbody>
+            </table>
+
+            <div class="total-pedido" th:if="${pedido.total != null}" style="display: flex;">
+              <span class="total-label">TOTAL PEDIDO:</span>
+              <span class="total-monto" th:text="${#numbers.formatDecimal(pedido.total, 0, 'COMMA', 2, 'POINT')} + '€'">0,00€</span>
+            </div>
+          </div>
+        </div>
+
         <div class="form-actions">
           <a th:href="@{/pedidos-clientes}" class="btn-cancel">Cancelar</a>
-          <button type="submit" class="btn-submit" id="btnSubmit" disabled>
+          <button type="submit" class="btn-submit" id="btnSubmit" th:disabled="${accion == 'crear'}">
             <span th:text="${accion == 'crear' ? 'Crear Pedido' : 'Guardar Cambios'}">Crear Pedido</span>
           </button>
         </div>
@@ -650,10 +698,12 @@
       var totalPedidoDiv = document.getElementById('totalPedido');
       var btnSubmit = document.getElementById('btnSubmit');
 
+      if (!container) return;
+
       if (productosSeleccionados.length === 0) {
           container.innerHTML = '<div class="empty-state"><i class="bi bi-cart-x"></i><p>No hay productos seleccionados</p></div>';
-          totalPedidoDiv.style.display = 'none';
-          btnSubmit.disabled = true;
+          if (totalPedidoDiv) totalPedidoDiv.style.display = 'none';
+          if (btnSubmit) btnSubmit.disabled = true;
           return;
       }
 
@@ -684,19 +734,27 @@
       var descuentoPedidoMonto = totalGeneral * (descuentoPedido / 100);
       var totalFinal = totalGeneral - descuentoPedidoMonto;
 
-      document.getElementById('totalMonto').textContent = totalFinal.toFixed(2) + '€';
-      totalPedidoDiv.style.display = 'flex';
-      btnSubmit.disabled = false;
+      if (totalPedidoDiv) {
+          document.getElementById('totalMonto').textContent = totalFinal.toFixed(2) + '€';
+          totalPedidoDiv.style.display = 'flex';
+      }
+      if (btnSubmit) btnSubmit.disabled = false;
   }
 
-  document.getElementById('descuento').addEventListener('input', renderizarSeleccionados);
+  var descuentoInput = document.getElementById('descuento');
+  if (descuentoInput) {
+      descuentoInput.addEventListener('input', renderizarSeleccionados);
+  }
 
   document.getElementById('formPedido').addEventListener('submit', function(e) {
-      if (productosSeleccionados.length === 0) {
+      // Solo validar productos si estamos creando
+      var productosContainer = document.getElementById('productosSeleccionados');
+      if (productosContainer && productosSeleccionados.length === 0) {
           e.preventDefault();
           alert('Debe seleccionar al menos un producto');
           return;
       }
+
       var oldInputs = this.querySelectorAll('.producto-hidden');
       oldInputs.forEach(function(input) { input.remove(); });
 
@@ -728,24 +786,14 @@
   }
 </script>
 
-<!-- Script CON inline SOLO para cargar datos de Thymeleaf al editar -->
+<!-- Script CON inline SOLO para edición: habilitar botón submit -->
 <script th:inline="javascript">
   window.onload = function() {
       var esEdicion = /*[[${accion == 'editar'}]]*/ false;
       if (esEdicion) {
-          var detallesExistentes = [];
-          /*[# th:each="detalle : ${pedido.detalles}"]*/
-          detallesExistentes.push({
-              id: /*[[${detalle.productoCliente.id}]]*/ 0,
-              nombre: /*[[${detalle.productoCliente.nombre}]]*/ '',
-              precio: /*[[${detalle.productoCliente.precioUnitario}]]*/ 0,
-              descuento: /*[[${detalle.productoCliente.descuento ?: 0}]]*/ 0,
-              cantidad: /*[[${detalle.cantidad}]]*/ 0
-          });
-          /*[/]*/
-
-          productosSeleccionados = detallesExistentes;
-          renderizarSeleccionados();
+          // Al editar, el botón siempre está habilitado
+          var btn = document.getElementById('btnSubmit');
+          if (btn) btn.disabled = false;
       }
   };
 </script>

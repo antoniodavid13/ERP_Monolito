@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escandallo - ERP</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link th:href="@{/css/productos.css}" rel="stylesheet">
+  <style>
+    .detail-container {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+
+    .detail-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .detail-header {
+        background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+        padding: 40px;
+        text-align: center;
+    }
+
+    .detail-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        font-size: 36px;
+        color: white;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .detail-id {
+        font-size: 28px;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 4px;
+    }
+
+    .detail-subtitle {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .detail-body {
+        padding: 32px;
+    }
+
+    .producto-info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 32px;
+    }
+
+    .info-box {
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 16px;
+        text-align: center;
+    }
+
+    .info-box-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+
+    .info-box-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .info-box-value.coste { color: var(--accent-yellow); }
+    .info-box-value.margen { color: var(--accent-cyan); }
+    .info-box-value.precio { color: var(--accent-green); }
+
+    .add-form {
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 20px;
+        margin-bottom: 24px;
+    }
+
+    .add-form-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-cyan);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .add-form-row {
+        display: grid;
+        grid-template-columns: 2fr 1fr auto;
+        gap: 12px;
+        align-items: end;
+    }
+
+    .add-form-group label {
+        display: block;
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .add-form-group select,
+    .add-form-group input {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 14px;
+    }
+
+    .add-form-group select:focus,
+    .add-form-group input:focus {
+        outline: none;
+        border-color: var(--accent-cyan);
+    }
+
+    .btn-agregar {
+        padding: 10px 20px;
+        background: linear-gradient(135deg, var(--accent-cyan), #2dd4bf);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--bg-dark);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .btn-agregar:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(57, 217, 217, 0.3);
+    }
+
+    .escandallo-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+    }
+
+    .escandallo-table th {
+        text-align: left;
+        padding: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        background: var(--bg-card-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .escandallo-table td {
+        padding: 14px 12px;
+        font-size: 14px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .escandallo-table .precio-col { color: var(--accent-cyan); }
+    .escandallo-table .coste-col { color: var(--accent-yellow); font-weight: 600; }
+
+    .btn-eliminar-linea {
+        padding: 6px 12px;
+        background: var(--accent-red);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 12px;
+    }
+
+    .btn-eliminar-linea:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+    }
+
+    .cantidad-edit {
+        width: 80px;
+        padding: 6px 10px;
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .btn-actualizar {
+        padding: 6px 12px;
+        background: var(--accent-yellow);
+        border: none;
+        border-radius: var(--radius-sm);
+        color: var(--bg-dark);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-actualizar:hover { transform: translateY(-2px); }
+
+    .resumen-coste {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+        background: var(--bg-card-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+    }
+
+    .resumen-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .resumen-valor {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--accent-green);
+    }
+
+    .detail-actions {
+        display: flex;
+        gap: 16px;
+        padding: 24px 32px;
+        background: var(--bg-card-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-detail {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px 20px;
+        border-radius: var(--radius-sm);
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-back {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .btn-back:hover {
+        background: var(--bg-card-secondary);
+        color: var(--accent-cyan);
+    }
+
+    .btn-recalcular {
+        background: var(--accent-purple);
+        color: white;
+    }
+
+    .btn-recalcular:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(163, 113, 247, 0.3);
+        color: white;
+    }
+
+    .back-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 14px;
+        margin-bottom: 24px;
+        transition: color 0.3s;
+    }
+
+    .back-link:hover { color: var(--accent-cyan); }
+
+    .empty-escandallo {
+        text-align: center;
+        padding: 48px;
+        color: var(--text-secondary);
+    }
+
+    .empty-escandallo i {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .producto-info-grid { grid-template-columns: repeat(2, 1fr); }
+        .add-form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <span class="logo-text">ERP</span>
+  </div>
+  <nav>
+    <ul class="nav-menu">
+      <li class="nav-item"><a th:href="@{/dashboard}" class="nav-link"><i class="bi bi-house-door"></i><span>Inicio</span></a></li>
+      <li class="nav-item"><a th:href="@{/clientes}" class="nav-link"><i class="bi bi-people"></i><span>Clientes</span></a></li>
+      <li class="nav-item"><a th:href="@{/trabajadores}" class="nav-link"><i class="bi bi-person-badge"></i><span>Trabajadores</span></a></li>
+      <li class="nav-item"><a th:href="@{/proveedores}" class="nav-link"><i class="bi bi-truck"></i><span>Proveedores</span></a></li>
+      <li class="nav-item"><a th:href="@{/productos-clientes}" class="nav-link active"><i class="bi bi-box-seam"></i><span>Productos</span></a></li>
+      <li class="nav-item"><a th:href="@{/pedidos-clientes}" class="nav-link"><i class="bi bi-cart3"></i><span>Pedidos</span></a></li>
+      <li class="nav-item"><a th:href="@{/departamentos}" class="nav-link"><i class="bi bi-building"></i><span>Departamentos</span></a></li>
+      <li class="nav-item"><a th:href="@{/almacenes}" class="nav-link"><i class="bi bi-building"></i><span>Almacenes</span></a></li>
+    </ul>
+  </nav>
+  <div class="sidebar-footer" style="margin-top: auto; padding: 20px;">
+    <a th:href="@{/logout}" class="nav-link" style="color: #ef4444;">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" style="width: 20px; height: 20px;">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16,17 21,12 16,7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      Cerrar Sesión
+    </a>
+  </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+  <div class="detail-container">
+    <a th:href="@{/productos-clientes}" class="back-link">
+      <i class="bi bi-arrow-left"></i>
+      Volver a Productos
+    </a>
+
+    <!-- Alertas -->
+    <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle me-2"></i>
+      <span th:text="${exito}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle me-2"></i>
+      <span th:text="${error}"></span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-header">
+        <div class="detail-icon">
+          <i class="bi bi-list-check"></i>
+        </div>
+        <h1 class="detail-id" th:text="'Escandallo: ' + ${producto.nombre}">Escandallo: Bizcocho</h1>
+        <p class="detail-subtitle">Composición de materias primas del producto</p>
+      </div>
+
+      <div class="detail-body">
+        <!-- Info del producto -->
+        <div class="producto-info-grid">
+          <div class="info-box">
+            <div class="info-box-label">Stock</div>
+            <div class="info-box-value" th:text="${producto.stock != null ? producto.stock : 0}">50</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Coste Escandallo</div>
+            <div class="info-box-value coste"
+                 th:text="${producto.costeEscandallo != null ? #numbers.formatDecimal(producto.costeEscandallo, 0, 'COMMA', 2, 'POINT') + '€' : '0,00€'}">0,86€</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Margen</div>
+            <div class="info-box-value margen"
+                 th:text="${producto.margenBeneficio != null ? producto.margenBeneficio + '%' : '0%'}">30%</div>
+          </div>
+          <div class="info-box">
+            <div class="info-box-label">Precio Venta</div>
+            <div class="info-box-value precio"
+                 th:text="${producto.precioUnitario != null ? #numbers.formatDecimal(producto.precioUnitario, 0, 'COMMA', 2, 'POINT') + '€' : '0,00€'}">1,12€</div>
+          </div>
+        </div>
+
+        <!-- Formulario para agregar componente -->
+        <div class="add-form">
+          <div class="add-form-title"><i class="bi bi-plus-circle"></i> Agregar Componente</div>
+          <form th:action="@{/escandallo/{id}/agregar(id=${producto.id})}" method="post">
+            <div class="add-form-row">
+              <div class="add-form-group">
+                <label>Materia Prima</label>
+                <select name="idProductoProv" required>
+                  <option value="">-- Seleccionar --</option>
+                  <option th:each="pp : ${productosProveedor}"
+                          th:value="${pp.id}"
+                          th:text="${pp.nombre + ' (Stock: ' + pp.stock + ' | ' + #numbers.formatDecimal(pp.precioLotes, 0, 'COMMA', 2, 'POINT') + '€)'}">
+                  </option>
+                </select>
+              </div>
+              <div class="add-form-group">
+                <label>Cantidad necesaria</label>
+                <input type="number" name="cantidadNecesaria" step="0.001" min="0.001" placeholder="Ej: 0.500" required>
+              </div>
+              <button type="submit" class="btn-agregar">
+                <i class="bi bi-plus"></i> Agregar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Tabla de líneas de escandallo -->
+        <div th:if="${lineas != null && !#lists.isEmpty(lineas)}">
+          <table class="escandallo-table">
+            <thead>
+            <tr>
+              <th>Materia Prima</th>
+              <th>Cantidad</th>
+              <th>Precio Unit.</th>
+              <th>Coste Línea</th>
+              <th>Stock Disp.</th>
+              <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="linea : ${lineas}">
+              <td th:text="${linea.productoProveedor.nombre}">Harina</td>
+              <td>
+                <form th:action="@{/escandallo/{idCli}/actualizar/{idProv}(idCli=${producto.id}, idProv=${linea.productoProveedor.id})}"
+                      method="post" style="display: flex; gap: 8px; align-items: center;">
+                  <input type="number" name="cantidadNecesaria" class="cantidad-edit"
+                         th:value="${linea.cantidadNecesaria}" step="0.001" min="0.001" required>
+                  <button type="submit" class="btn-actualizar"><i class="bi bi-check"></i></button>
+                </form>
+              </td>
+              <td class="precio-col"
+                  th:text="${#numbers.formatDecimal(linea.productoProveedor.precioLotes, 0, 'COMMA', 2, 'POINT')} + '€'">0,50€</td>
+              <td class="coste-col"
+                  th:text="${#numbers.formatDecimal(linea.cantidadNecesaria * linea.productoProveedor.precioLotes, 0, 'COMMA', 2, 'POINT')} + '€'">0,25€</td>
+              <td th:text="${linea.productoProveedor.stock}">100</td>
+              <td>
+                <a th:href="@{/escandallo/{idCli}/eliminar/{idProv}(idCli=${producto.id}, idProv=${linea.productoProveedor.id})}"
+                   class="btn-eliminar-linea"
+                   onclick="return confirm('¿Eliminar este componente?')">
+                  <i class="bi bi-trash"></i>
+                </a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+          <!-- Resumen -->
+          <div class="resumen-coste">
+            <span class="resumen-label">COSTE TOTAL ESCANDALLO:</span>
+            <span class="resumen-valor"
+                  th:text="${producto.costeEscandallo != null ? #numbers.formatDecimal(producto.costeEscandallo, 0, 'COMMA', 2, 'POINT') + '€' : '0,00€'}">0,86€</span>
+          </div>
+        </div>
+
+        <!-- Estado vacío -->
+        <div th:if="${lineas == null || #lists.isEmpty(lineas)}" class="empty-escandallo">
+          <i class="bi bi-puzzle"></i>
+          <p>Este producto no tiene materias primas asignadas</p>
+          <p style="font-size: 12px;">Utiliza el formulario de arriba para agregar componentes</p>
+        </div>
+      </div>
+
+      <div class="detail-actions">
+        <a th:href="@{/productos-clientes}" class="btn-detail btn-back">
+          <i class="bi bi-arrow-left"></i>
+          Volver a Productos
+        </a>
+        <a th:href="@{/productos-clientes/editar/{id}(id=${producto.id})}" class="btn-detail btn-back">
+          <i class="bi bi-pencil"></i>
+          Editar Producto
+        </a>
+        <form th:action="@{/escandallo/recalcular-todos}" method="post" style="flex: 1;">
+          <button type="submit" class="btn-detail btn-recalcular" style="width: 100%;">
+            <i class="bi bi-arrow-repeat"></i>
+            Recalcular Todos
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

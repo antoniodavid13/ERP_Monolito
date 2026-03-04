@@ -1,75 +1,70 @@
-const form = document.getElementById('idregistro');
-const btnLogin = document.querySelector('.btnLogin');
-const inputs = form.querySelectorAll('input');
+document.addEventListener('DOMContentLoaded', function () {
 
-// Deshabilitar botón inicialmente
-btnLogin.disabled = true;
+  const form     = document.getElementById('registro');
+  const btnLogin = document.querySelector('.btnLogin');
 
-// Validar en tiempo real
-inputs.forEach(input => {
+  if (!form || !btnLogin) return;
+
+  btnLogin.disabled = true;
+
+  const inputs = form.querySelectorAll('input');
+
+  inputs.forEach(input => {
     input.addEventListener('input', validateForm);
     input.addEventListener('blur', validateField);
-});
+  });
 
-function validateField(e) {
-    const field = e.target;
+  function validateField(e) {
+    const field   = e.target;
     const fieldId = field.id;
-    const value = field.value.trim();
+    const value   = field.value.trim();
 
-    // Limpiar error del campo
     const errorElement = document.getElementById('error' + capitalize(fieldId));
-    if (errorElement) {
-        errorElement.textContent = '';
-    }
+    if (errorElement) errorElement.textContent = '';
     field.classList.remove('input-error');
 
-    switch(fieldId) {
-        case 'usuario':
-            if (value === '') {
-                showError(fieldId, 'El usuario es obligatorio');
-            } else if (value.length < 5) {
-                showError(fieldId, 'El usuario debe tener al menos 5 caracteres');
-            }
-            break;
-        case 'correo':
-            if (value === '') {
-                showError(fieldId, 'El correo es obligatorio');
-            } else if (!value.includes('@')) {
-                showError(fieldId, 'El correo debe contener @');
-            }
-            break;
-        case 'password':
-            if (value === '') {
-                showError(fieldId, 'La contraseña es obligatoria');
-            } else if (value.length < 6) {
-                showError(fieldId, 'La contraseña debe tener al menos 6 caracteres');
-            }
-            break;
+    switch (fieldId) {
+      case 'usuario':
+        if (value === '') {
+          showError(fieldId, 'El usuario es obligatorio');
+        } else if (value.length < 5) {
+          showError(fieldId, 'El usuario debe tener al menos 5 caracteres');
+        }
+        break;
+      case 'correo':
+        if (value === '') {
+          showError(fieldId, 'El correo es obligatorio');
+        } else if (!value.includes('@')) {
+          showError(fieldId, 'El correo debe contener @');
+        }
+        break;
+      case 'password':
+        if (value === '') {
+          showError(fieldId, 'La contraseña es obligatoria');
+        } else if (value.length < 6) {
+          showError(fieldId, 'La contraseña debe tener al menos 6 caracteres');
+        }
+        break;
     }
-}
+  }
 
-function validateForm() {
-    const usuario = document.getElementById('usuario').value.trim();
-    const correo = document.getElementById('correo').value.trim();
+  function validateForm() {
+    const usuario  = document.getElementById('usuario').value.trim();
+    const correo   = document.getElementById('correo').value.trim();
     const password = document.getElementById('password').value;
 
-    const isUsuarioValid = usuario.length >= 5;
-    const isCorreoValid = correo.includes('@');
-    const isPasswordValid = password.length >= 6;
-
-    const allValid = isUsuarioValid && isCorreoValid && isPasswordValid;
-
+    const allValid = usuario.length >= 5 && correo.includes('@') && password.length >= 6;
     btnLogin.disabled = !allValid;
-}
+  }
 
-function showError(fieldId, message) {
+  function showError(fieldId, message) {
     const errorElement = document.getElementById('error' + capitalize(fieldId));
-    if (errorElement) {
-        errorElement.textContent = message;
-    }
+    if (errorElement) errorElement.textContent = message;
     document.getElementById(fieldId).classList.add('input-error');
-}
+  }
 
-function capitalize(str) {
+  function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
-}
+  }
+
+});

@@ -194,30 +194,17 @@ public class PedidoProveedorController {
     /**
      * Procesar actualización de pedido
      */
+    /**
+     * Procesar actualización de pedido (solo datos generales, sin productos)
+     */
     @PostMapping("/actualizar/{id}")
     public String actualizarPedidoProveedor(
             @PathVariable Long id,
             @ModelAttribute PedidoProveedor pedido,
-            @RequestParam(value = "productosIds", required = false) List<Long> productosIds,
-            @RequestParam(value = "cantidades", required = false) List<Integer> cantidades,
             RedirectAttributes redirectAttributes) {
 
         try {
-            // Validar que se hayan seleccionado productos
-            if (productosIds == null || productosIds.isEmpty()) {
-                throw new RuntimeException("Debe seleccionar al menos un producto");
-            }
-
-            // Preparar lista de productos seleccionados
-            List<Map<String, Object>> productosSeleccionados = new ArrayList<>();
-            for (int i = 0; i < productosIds.size(); i++) {
-                Map<String, Object> productoData = new HashMap<>();
-                productoData.put("idProducto", productosIds.get(i));
-                productoData.put("cantidad", cantidades.get(i));
-                productosSeleccionados.add(productoData);
-            }
-
-            pedidoProveedorService.actualizarPedidoProveedor(id, pedido, productosSeleccionados);
+            pedidoProveedorService.actualizarPedidoProveedor(id, pedido);
             redirectAttributes.addFlashAttribute("exito", "Pedido actualizado exitosamente");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());

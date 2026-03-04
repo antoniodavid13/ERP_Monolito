@@ -4,6 +4,7 @@ import adfdev.erp.demo.ProductoCliente;
 import adfdev.erp.demo.ProductoCliente.EstadoProducto;
 import adfdev.erp.demo.interfaces.ProductoClienterepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,15 +25,21 @@ public class ProductoClienteservice {
     @Autowired
     private ProductoClienterepository productoClienteRepository;
 
+    @Autowired
+    @Lazy
+    private Escandalloservice escandalloService;
+
     /**
      * Crear un nuevo producto de cliente
      */
-    public ProductoCliente crearProductoCliente(ProductoCliente productoCliente) {
-        if (productoClienteRepository.existsByNombre(productoCliente.getNombre())) {
-            throw new RuntimeException("Ya existe un producto con el nombre: " + productoCliente.getNombre());
+    public ProductoCliente crearProductoCliente(ProductoCliente producto) {
+        producto.setCosteEscandallo(BigDecimal.ZERO);
+        producto.setPrecioUnitario(BigDecimal.ZERO);
+        producto.setStock(0); // Se calculará desde el escandallo
+        if (producto.getDescuento() == null) {
+            producto.setDescuento(0);
         }
-
-        return productoClienteRepository.save(productoCliente);
+        return productoClienteRepository.save(producto);
     }
 
     @Transactional(readOnly = true)
@@ -57,11 +65,17 @@ public class ProductoClienteservice {
 
                     producto.setNombre(productoActualizado.getNombre());
                     producto.setStock(productoActualizado.getStock());
-                    producto.setPrecioUnitario(productoActualizado.getPrecioUnitario());
                     producto.setDescuento(productoActualizado.getDescuento());
                     producto.setEstado(productoActualizado.getEstado());
+                    producto.setMargenBeneficio(productoActualizado.getMargenBeneficio());
 
-                    return productoClienteRepository.save(producto);
+                    // NO se toca precioUnitario ni costeEscandallo manualmente
+                    productoClienteRepository.save(producto);
+
+                    // Recalcular precio con el nuevo margen
+                    escandalloService.recalcularCosteProductoCliente(id);
+
+                    return productoClienteRepository.findById(id).orElse(producto);
                 })
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
     }
@@ -130,7 +144,6 @@ public class ProductoClienteservice {
             estadisticas.put("porcentajeBajas", 0);
         }
 
-        // Calcular stock total
         Long stockTotal = productoClienteRepository.calcularStockTotal(EstadoProducto.ACTIVO);
         estadisticas.put("stockTotal", stockTotal != null ? stockTotal : 0);
 

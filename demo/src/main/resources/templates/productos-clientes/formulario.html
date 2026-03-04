@@ -10,7 +10,7 @@
     <link th:href="@{/css/productos.css}" rel="stylesheet">
     <style>
         .form-container {
-            max-width: 650px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -47,6 +47,22 @@
             margin-bottom: 24px;
             background: rgba(57, 217, 217, 0.2);
             color: var(--accent-cyan);
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--accent-cyan);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .form-group {
@@ -97,10 +113,229 @@
             border-color: var(--accent-red);
         }
 
+        .form-group input:read-only {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* ==================== ESCANDALLO SECTION ==================== */
+        .escandallo-selector {
+            background: var(--bg-card-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .escandallo-search {
+            margin-bottom: 16px;
+        }
+
+        .escandallo-search input {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .escandallo-search input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+        }
+
+        .escandallo-list {
+            max-height: 280px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+        }
+
+        .escandallo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+
+        .escandallo-item:last-child {
+            border-bottom: none;
+        }
+
+        .escandallo-item:hover {
+            background: var(--bg-card);
+        }
+
+        .escandallo-info {
+            flex: 1;
+        }
+
+        .escandallo-nombre {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .escandallo-detalles {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .escandallo-add-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .escandallo-add-controls input {
+            width: 90px;
+            padding: 6px 8px;
+            text-align: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .btn-add-escandallo {
+            padding: 6px 16px;
+            background: var(--accent-cyan);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: var(--bg-dark);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add-escandallo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(57, 217, 217, 0.3);
+        }
+
+        /* Componentes seleccionados */
+        .componentes-seleccionados {
+            background: var(--bg-card-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 20px;
+        }
+
+        .componente-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+        }
+
+        .componente-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .componente-info {
+            flex: 1;
+        }
+
+        .componente-nombre {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .componente-detalle {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .componente-cantidad {
+            color: var(--accent-cyan);
+            font-weight: 600;
+            margin: 0 16px;
+        }
+
+        .componente-coste {
+            color: var(--accent-yellow);
+            font-weight: 600;
+            font-size: 14px;
+            margin: 0 16px;
+        }
+
+        .btn-remove-comp {
+            padding: 6px 12px;
+            background: var(--accent-red);
+            border: none;
+            border-radius: var(--radius-sm);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-remove-comp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(248, 81, 73, 0.3);
+        }
+
+        .resumen-escandallo {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: var(--bg-card);
+            border-radius: var(--radius-sm);
+            margin-top: 16px;
+        }
+
+        .resumen-item {
+            text-align: center;
+        }
+
+        .resumen-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .resumen-valor {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .resumen-valor.coste { color: var(--accent-yellow); }
+        .resumen-valor.margen { color: var(--accent-cyan); }
+        .resumen-valor.precio { color: var(--accent-green); }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
         }
 
         .form-actions {
@@ -186,6 +421,13 @@
             font-size: 28px;
             color: white;
         }
+
+        .hint-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -203,54 +445,14 @@
     </div>
     <nav>
         <ul class="nav-menu">
-            <li class="nav-item">
-                <a th:href="@{/dashboard}" class="nav-link">
-                    <i class="bi bi-house-door"></i>
-                    <span>Inicio</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/clientes}" class="nav-link">
-                    <i class="bi bi-people"></i>
-                    <span>Clientes</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/trabajadores}" class="nav-link">
-                    <i class="bi bi-person-badge"></i>
-                    <span>Trabajadores</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/proveedores}" class="nav-link ">
-                    <i class="bi bi-truck"></i>
-                    <span>Proveedores</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/productos-clientes}" class="nav-link active">
-                    <i class="bi bi-box-seam"></i>
-                    <span>Productos</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/pedidos-clientes}" class="nav-link">
-                    <i class="bi bi-cart3"></i>
-                    <span>Pedidos</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/departamentos}" class="nav-link">
-                    <i class="bi bi-building"></i>
-                    <span>Departamentos</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a th:href="@{/almacenes}" class="nav-link">
-                    <i class="bi bi-building"></i>
-                    <span>Almacenes</span>
-                </a>
-            </li>
+            <li class="nav-item"><a th:href="@{/dashboard}" class="nav-link"><i class="bi bi-house-door"></i><span>Inicio</span></a></li>
+            <li class="nav-item"><a th:href="@{/clientes}" class="nav-link"><i class="bi bi-people"></i><span>Clientes</span></a></li>
+            <li class="nav-item"><a th:href="@{/trabajadores}" class="nav-link"><i class="bi bi-person-badge"></i><span>Trabajadores</span></a></li>
+            <li class="nav-item"><a th:href="@{/proveedores}" class="nav-link"><i class="bi bi-truck"></i><span>Proveedores</span></a></li>
+            <li class="nav-item"><a th:href="@{/productos-clientes}" class="nav-link active"><i class="bi bi-box-seam"></i><span>Productos</span></a></li>
+            <li class="nav-item"><a th:href="@{/pedidos-clientes}" class="nav-link"><i class="bi bi-cart3"></i><span>Pedidos</span></a></li>
+            <li class="nav-item"><a th:href="@{/departamentos}" class="nav-link"><i class="bi bi-building"></i><span>Departamentos</span></a></li>
+            <li class="nav-item"><a th:href="@{/almacenes}" class="nav-link"><i class="bi bi-building"></i><span>Almacenes</span></a></li>
         </ul>
     </nav>
     <div class="sidebar-footer" style="margin-top: auto; padding: 20px;">
@@ -267,20 +469,14 @@
 
 <!-- Main Content -->
 <main class="main-content">
-    <!-- Header -->
     <header class="header">
         <div class="search-box">
             <i class="bi bi-search"></i>
             <input type="text" placeholder="Buscar...">
         </div>
         <div class="header-right">
-            <button class="icon-btn">
-                <i class="bi bi-envelope"></i>
-            </button>
-            <button class="icon-btn notification">
-                <i class="bi bi-bell"></i>
-                <span class="badge-notify">3</span>
-            </button>
+            <button class="icon-btn"><i class="bi bi-envelope"></i></button>
+            <button class="icon-btn notification"><i class="bi bi-bell"></i><span class="badge-notify">3</span></button>
             <div class="user-profile">
                 <div class="user-avatar">AD</div>
                 <div class="user-info">
@@ -298,7 +494,6 @@
             Volver a Productos Clientes
         </a>
 
-        <!-- Alertas -->
         <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="bi bi-exclamation-triangle me-2"></i>
             <span th:text="${error}"></span>
@@ -310,15 +505,12 @@
                 <i th:class="${accion == 'crear' ? 'bi bi-box-seam' : 'bi bi-pencil-square'}"></i>
             </div>
             <h1 class="form-title" th:text="${titulo}">Crear Producto Cliente</h1>
-            <p class="form-subtitle" th:text="${accion == 'crear' ? 'Ingresa los datos del nuevo producto para cliente' : 'Modifica los datos del producto'}">
-                Ingresa los datos del nuevo producto para cliente
+            <p class="form-subtitle" th:text="${accion == 'crear' ? 'Define el producto y su composición de materias primas' : 'Modifica los datos del producto y su escandallo'}">
+                Define el producto y su composición de materias primas
             </p>
 
             <div class="text-center mb-4">
-        <span class="tipo-badge">
-          <i class="bi bi-people"></i>
-          Producto Cliente
-        </span>
+                <span class="tipo-badge"><i class="bi bi-puzzle"></i> Blueprint + Escandallo</span>
             </div>
 
             <form th:action="${accion == 'crear'} ? @{/productos-clientes/crear} : @{/productos-clientes/actualizar/{id}(id=${producto.id})}"
@@ -328,69 +520,56 @@
 
                 <input type="hidden" th:field="*{id}" />
 
-                <div class="form-group">
-                    <label for="nombre">Nombre del Producto *</label>
-                    <input type="text"
-                           id="nombre"
-                           th:field="*{nombre}"
-                           placeholder="Ej: Laptop HP Pavilion 15"
-                           required>
-                    <span id="errorNombre" class="error-message"></span>
-                </div>
+                <!-- SECCIÓN 1: Datos del Producto -->
+                <div class="form-section">
+                    <h3 class="form-section-title"><i class="bi bi-info-circle"></i> Información del Producto</h3>
 
-                <div class="form-row">
                     <div class="form-group">
-                        <label for="stock">Stock *</label>
-                        <input type="number"
-                               id="stock"
-                               th:field="*{stock}"
-                               placeholder="100"
-                               min="0"
-                               required>
-                        <span id="errorStock" class="error-message"></span>
+                        <label for="nombre">Nombre del Producto *</label>
+                        <input type="text" id="nombre" th:field="*{nombre}" placeholder="Ej: Bizcocho Artesanal" required>
+                        <span id="errorNombre" class="error-message"></span>
                     </div>
 
-                    <div class="form-group">
-                        <label for="precioUnitario">Precio Unitario (€) *</label>
-                        <input type="number"
-                               id="precioUnitario"
-                               th:field="*{precioUnitario}"
-                               placeholder="25.99"
-                               step="0.01"
-                               min="0"
-                               required>
-                        <span id="errorPrecioUnitario" class="error-message"></span>
-                    </div>
-                </div>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <input type="hidden" id="stock" th:field="*{stock}" value="0">
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="descuento">Descuento (%)</label>
-                        <input type="number"
-                               id="descuento"
-                               th:field="*{descuento}"
-                               placeholder="10"
-                               min="0"
-                               max="100"
-                               value="0">
-                        <span id="errorDescuento" class="error-message"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="margenBeneficio">Margen Beneficio (%) *</label>
+                            <input type="number" id="margenBeneficio" th:field="*{margenBeneficio}" placeholder="30" step="0.01" min="0" required>
+                            <span class="hint-text">Precio = Coste × (1 + Margen%)</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descuento">Descuento (%)</label>
+                            <input type="number" id="descuento" th:field="*{descuento}" placeholder="0" min="0" max="100" value="0">
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="estado">Estado *</label>
-                        <select id="estado" th:field="*{estado}" required>
-                            <option th:each="est : ${estados}"
-                                    th:value="${est}"
-                                    th:text="${est}">
-                            </option>
-                        </select>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="estado">Estado *</label>
+                            <select id="estado" th:field="*{estado}" required>
+                                <option th:each="est : ${estados}" th:value="${est}" th:text="${est}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Precio Unitario (calculado)</label>
+                            <input type="text" id="precioCalculado" readonly placeholder="Se calcula desde el escandallo"
+                                   style="cursor: not-allowed; opacity: 0.6;">
+                            <span class="hint-text">Coste escandallo × (1 + margen / 100)</span>
+                        </div>
                     </div>
                 </div>
+
 
                 <div class="form-actions">
                     <a th:href="@{/productos-clientes}" class="btn-cancel">Cancelar</a>
                     <button type="submit" class="btn-submit" id="btnSubmit">
-                        <span th:text="${accion == 'crear' ? 'Crear Producto' : 'Guardar Cambios'}">Crear Producto</span>
+                        <span th:text="${accion == 'crear' ? 'Crear Producto con Escandallo' : 'Guardar Cambios'}">Crear Producto con Escandallo</span>
                     </button>
                 </div>
             </form>
@@ -399,85 +578,167 @@
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    const form = document.getElementById('formProducto');
-    const btnSubmit = document.getElementById('btnSubmit');
-    const inputs = form.querySelectorAll('input[type="text"], input[type="number"]');
 
-    inputs.forEach(input => {
-        input.addEventListener('input', validateForm);
-        input.addEventListener('blur', validateField);
+<!-- Script principal sin inline -->
+<script>
+    let componentes = [];
+
+    function agregarComponenteDesdeBtn(btn) {
+        var item = btn.closest('.escandallo-item');
+        var id = parseInt(item.getAttribute('data-id'));
+        var nombre = item.getAttribute('data-nombre');
+        var precio = parseFloat(item.getAttribute('data-precio'));
+        var stock = parseInt(item.getAttribute('data-stock'));
+        var cantInput = document.getElementById('cant_mp_' + id);
+        var cantidad = parseFloat(cantInput.value);
+
+        if (isNaN(cantidad) || cantidad <= 0) {
+            alert('Introduce una cantidad válida');
+            return;
+        }
+
+        var existente = componentes.find(function(c) { return c.id === id; });
+        if (existente) {
+            existente.cantidad = cantidad;
+        } else {
+            componentes.push({ id: id, nombre: nombre, precio: precio, stock: stock, cantidad: cantidad });
+        }
+
+        renderizarComponentes();
+        cantInput.value = '1.000';
+    }
+
+    function eliminarComponente(id) {
+        componentes = componentes.filter(function(c) { return c.id !== id; });
+        renderizarComponentes();
+    }
+
+    function renderizarComponentes() {
+        var container = document.getElementById('componentesSeleccionados');
+        var resumen = document.getElementById('resumenEscandallo');
+
+        if (componentes.length === 0) {
+            container.innerHTML = '<div class="empty-state"><i class="bi bi-puzzle"></i><p>Añade materias primas para definir la composición</p></div>';
+            resumen.style.display = 'none';
+            actualizarPrecioCalculado(0);
+            return;
+        }
+
+        var html = '';
+        var costeTotal = 0;
+
+        componentes.forEach(function(comp) {
+            var costLinea = comp.cantidad * comp.precio;
+            costeTotal += costLinea;
+
+            html += '<div class="componente-item">'
+                + '<div class="componente-info">'
+                + '<div class="componente-nombre">' + comp.nombre + '</div>'
+                + '<div class="componente-detalle">' + comp.precio.toFixed(2) + '€/ud × ' + comp.cantidad.toFixed(3) + ' = ' + costLinea.toFixed(2) + '€</div>'
+                + '</div>'
+                + '<span class="componente-cantidad">' + comp.cantidad.toFixed(3) + '</span>'
+                + '<span class="componente-coste">' + costLinea.toFixed(2) + '€</span>'
+                + '<button type="button" class="btn-remove-comp" onclick="eliminarComponente(' + comp.id + ')">'
+                + '<i class="bi bi-x"></i></button>'
+                + '</div>';
+        });
+
+        container.innerHTML = html;
+
+        var margen = parseFloat(document.getElementById('margenBeneficio').value) || 0;
+        var precioVenta = costeTotal * (1 + margen / 100);
+
+        document.getElementById('costeTotal').textContent = costeTotal.toFixed(2) + '€';
+        document.getElementById('margenDisplay').textContent = margen + '%';
+        document.getElementById('precioVenta').textContent = precioVenta.toFixed(2) + '€';
+        resumen.style.display = 'flex';
+
+        actualizarPrecioCalculado(precioVenta);
+    }
+
+    function actualizarPrecioCalculado(precio) {
+        document.getElementById('precioCalculado').value = precio.toFixed(2) + '€';
+    }
+
+    // Recalcular al cambiar margen
+    document.getElementById('margenBeneficio').addEventListener('input', function() {
+        renderizarComponentes();
     });
 
-    function validateField(e) {
-        const field = e.target;
-        const fieldId = field.id;
-        const value = field.value.trim();
-
-        const errorElement = document.getElementById('error' + capitalize(fieldId));
-        if (errorElement) {
-            errorElement.textContent = '';
-        }
-        field.classList.remove('input-error');
-
-        if (fieldId === 'nombre') {
-            if (value === '') {
-                showError(fieldId, 'El nombre es obligatorio');
-            } else if (value.length < 3) {
-                showError(fieldId, 'El nombre debe tener al menos 3 caracteres');
-            }
-        }
-
-        if (fieldId === 'stock') {
-            if (value === '') {
-                showError(fieldId, 'El stock es obligatorio');
-            } else if (parseInt(value) < 0) {
-                showError(fieldId, 'El stock no puede ser negativo');
-            }
-        }
-
-        if (fieldId === 'precioUnitario') {
-            if (value === '') {
-                showError(fieldId, 'El precio es obligatorio');
-            } else if (parseFloat(value) <= 0) {
-                showError(fieldId, 'El precio debe ser mayor a 0');
-            }
-        }
-
-        if (fieldId === 'descuento') {
-            if (value !== '' && (parseInt(value) < 0 || parseInt(value) > 100)) {
-                showError(fieldId, 'El descuento debe estar entre 0 y 100');
-            }
-        }
+    // Filtrar materias primas
+    function filtrarMaterias() {
+        var search = document.getElementById('searchMateria').value.toLowerCase();
+        var items = document.querySelectorAll('.escandallo-item');
+        items.forEach(function(item) {
+            var nombre = item.querySelector('.escandallo-nombre').textContent.toLowerCase();
+            item.style.display = nombre.includes(search) ? 'flex' : 'none';
+        });
     }
 
-    function validateForm() {
-        const nombre = document.getElementById('nombre').value.trim();
-        const stock = document.getElementById('stock').value;
-        const precio = document.getElementById('precioUnitario').value;
+    // Inyectar datos ocultos al enviar
+    document.getElementById('formProducto').addEventListener('submit', function(e) {
+        // Limpiar inputs previos
+        var oldInputs = this.querySelectorAll('.escandallo-hidden');
+        oldInputs.forEach(function(input) { input.remove(); });
 
-        const isNombreValid = nombre.length >= 3;
-        const isStockValid = stock !== '' && parseInt(stock) >= 0;
-        const isPrecioValid = precio !== '' && parseFloat(precio) > 0;
+        var form = this;
+        componentes.forEach(function(comp) {
+            var inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = 'escandalloIds';
+            inputId.value = comp.id;
+            inputId.className = 'escandallo-hidden';
+            form.appendChild(inputId);
 
-        const allValid = isNombreValid && isStockValid && isPrecioValid;
+            var inputCant = document.createElement('input');
+            inputCant.type = 'hidden';
+            inputCant.name = 'escandalloCantidades';
+            inputCant.value = comp.cantidad;
+            inputCant.className = 'escandallo-hidden';
+            form.appendChild(inputCant);
+        });
+    });
 
-        btnSubmit.disabled = !allValid;
-    }
+    // Validación básica
+        function validateForm() {
+            var nombre = document.getElementById('nombre').value.trim();
+            var margen = document.getElementById('margenBeneficio').value;
 
-    function showError(fieldId, message) {
-        const errorElement = document.getElementById('error' + capitalize(fieldId));
-        if (errorElement) {
-            errorElement.textContent = message;
+            var allValid = nombre.length >= 3 && margen !== '';
+            document.getElementById('btnSubmit').disabled = !allValid;
         }
-        document.getElementById(fieldId).classList.add('input-error');
-    }
 
-    function capitalize(str) {
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
+        document.querySelectorAll('#nombre, #margenBeneficio').forEach(function(el) {
+            el.addEventListener('input', validateForm);
+        });
+
+    document.querySelectorAll('#nombre, #stock, #margenBeneficio').forEach(function(el) {
+        el.addEventListener('input', validateForm);
+    });
 
     validateForm();
+</script>
+
+<!-- Script con inline para cargar datos al editar -->
+<script th:inline="javascript">
+    window.onload = function() {
+        var esEdicion = /*[[${accion == 'editar'}]]*/ false;
+        if (esEdicion) {
+            var lineasExistentes = [];
+            /*[# th:each="linea : ${lineasEscandallo}"]*/
+            lineasExistentes.push({
+                id: /*[[${linea.productoProveedor.id}]]*/ 0,
+                nombre: /*[[${linea.productoProveedor.nombre}]]*/ '',
+                precio: /*[[${linea.productoProveedor.precioLotes}]]*/ 0,
+                stock: /*[[${linea.productoProveedor.stock}]]*/ 0,
+                cantidad: /*[[${linea.cantidadNecesaria}]]*/ 0
+            });
+            /*[/]*/
+
+            componentes = lineasExistentes;
+            renderizarComponentes();
+        }
+    };
 </script>
 </body>
 </html>

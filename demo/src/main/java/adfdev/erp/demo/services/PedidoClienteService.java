@@ -1,11 +1,11 @@
 package adfdev.erp.demo.services;
 
-import adfdev.erp.demo.DetallePedidoCliente;
-import adfdev.erp.demo.PedidoCliente;
+import adfdev.erp.demo.*;
 import adfdev.erp.demo.PedidoCliente.EstadoPedido;
-import adfdev.erp.demo.ProductoCliente;
 import adfdev.erp.demo.interfaces.PedidoClienteRepository;
 import adfdev.erp.demo.interfaces.ProductoClienterepository;
+import adfdev.erp.demo.interfaces.ProductoProveedorrepository;
+import adfdev.erp.demo.interfaces.Escandallorepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,11 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import adfdev.erp.demo.services.Escandalloservice;
+
 
 @Service
 @Transactional
@@ -31,21 +34,26 @@ public class PedidoClienteService {
     @Autowired
     private ProductoClienterepository productoClienteRepository;
 
+    @Autowired
+    private ProductoProveedorrepository productoProveedorRepository;
+
+    @Autowired
+    private Escandallorepository escandalloRepository;
+
+    @Autowired
+    private Escandalloservice escandalloService;
+
     /**
      * Crear un nuevo pedido de cliente
      */
     public PedidoCliente crearPedidoCliente(PedidoCliente pedido, List<Map<String, Object>> productosSeleccionados) {
-        // Establecer fecha si no existe
         if (pedido.getFechaPedido() == null) {
             pedido.setFechaPedido(LocalDate.now());
         }
-
-        // Establecer estado por defecto
         if (pedido.getEstado() == null) {
             pedido.setEstado(EstadoPedido.EN_ESPERA);
         }
 
-        // Agregar productos al pedido
         for (Map<String, Object> productoData : productosSeleccionados) {
             Long idProducto = Long.valueOf(productoData.get("idProducto").toString());
             Integer cantidad = Integer.valueOf(productoData.get("cantidad").toString());
@@ -53,43 +61,37 @@ public class PedidoClienteService {
             ProductoCliente producto = productoClienteRepository.findById(idProducto)
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + idProducto));
 
-            // Verificar stock disponible
-            if (producto.getStock() < cantidad) {
-                throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
-            }
+            // Ya NO verificar stock de producto cliente
+            // Solo verificar stock de materias primas
+            verificarStockMateriasPrimas(idProducto, cantidad);
 
             DetallePedidoCliente detalle = new DetallePedidoCliente(pedido, producto, cantidad);
             pedido.addDetalle(detalle);
         }
 
-        // Calcular total del pedido
         pedido.calcularTotal();
-
-        // Guardar pedido
         PedidoCliente pedidoGuardado = pedidoClienteRepository.save(pedido);
 
-        // Restar stock de los productos (venta a cliente)
         for (DetallePedidoCliente detalle : pedidoGuardado.getDetalles()) {
             ProductoCliente producto = detalle.getProductoCliente();
-            producto.setStock(producto.getStock() - detalle.getCantidad());
+            int cantidad = detalle.getCantidad();
+
+            descontarMateriasPrimas(producto.getId(), cantidad);
+
+            // Recalcular stock fabricable
+            producto.setStock(escandalloService.calcularStockFabricable(producto.getId()));
             productoClienteRepository.save(producto);
         }
 
         return pedidoGuardado;
     }
 
-/**
- * Actualizar pedido existente
- */
-
     /**
      * Actualizar pedido existente
      */
-    public PedidoCliente actualizarPedidoCliente(Long id, PedidoCliente pedidoActualizado,
-                                                 List<Map<String, Object>> productosSeleccionados) {
+    public PedidoCliente actualizarPedidoCliente(Long id, PedidoCliente pedidoActualizado) {
         return pedidoClienteRepository.findById(id)
                 .map(pedido -> {
-                    // Actualizar campos básicos
                     pedido.setDireccion(pedidoActualizado.getDireccion());
                     pedido.setEstado(pedidoActualizado.getEstado());
                     pedido.setDescuento(pedidoActualizado.getDescuento());
@@ -98,42 +100,7 @@ public class PedidoClienteService {
                     pedido.setIdAlmacen(pedidoActualizado.getIdAlmacen());
                     pedido.setIdMetodoEnvio(pedidoActualizado.getIdMetodoEnvio());
 
-                    // Devolver stock de los detalles antiguos (sumar)
-                    for (DetallePedidoCliente detalleAntiguo : pedido.getDetalles()) {
-                        ProductoCliente producto = detalleAntiguo.getProductoCliente();
-                        producto.setStock(producto.getStock() + detalleAntiguo.getCantidad());
-                        productoClienteRepository.save(producto);
-                    }
-
-                    // Limpiar detalles antiguos
-                    pedido.getDetalles().clear();
-
-                    // Agregar nuevos productos
-                    for (Map<String, Object> productoData : productosSeleccionados) {
-                        Long idProducto = Long.valueOf(productoData.get("idProducto").toString());
-                        Integer cantidad = Integer.valueOf(productoData.get("cantidad").toString());
-
-                        ProductoCliente producto = productoClienteRepository.findById(idProducto)
-                                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + idProducto));
-
-                        if (producto.getStock() < cantidad) {
-                            throw new RuntimeException("Stock insuficiente para el producto: " + producto.getNombre());
-                        }
-
-                        DetallePedidoCliente detalle = new DetallePedidoCliente(pedido, producto, cantidad);
-                        pedido.addDetalle(detalle);
-                    }
-
-                    // Restar stock de los nuevos detalles
-                    for (DetallePedidoCliente detalleNuevo : pedido.getDetalles()) {
-                        ProductoCliente producto = detalleNuevo.getProductoCliente();
-                        producto.setStock(producto.getStock() - detalleNuevo.getCantidad());
-                        productoClienteRepository.save(producto);
-                    }
-
-                    // Recalcular total
                     pedido.calcularTotal();
-
                     return pedidoClienteRepository.save(pedido);
                 })
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
@@ -153,14 +120,85 @@ public class PedidoClienteService {
         PedidoCliente pedido = pedidoClienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
 
-        // Devolver stock de los productos al eliminar el pedido
+        // Devolver stock de producto cliente Y materias primas
+        // En eliminarPedidoCliente, DESPUÉS de devolver materias primas:
         for (DetallePedidoCliente detalle : pedido.getDetalles()) {
             ProductoCliente producto = detalle.getProductoCliente();
-            producto.setStock(producto.getStock() + detalle.getCantidad());
+            int cantidad = detalle.getCantidad();
+
+            // Ya NO hacer: producto.setStock(producto.getStock() + cantidad);
+
+            devolverMateriasPrimas(producto.getId(), cantidad);
+
+            // Recalcular stock fabricable
+            producto.setStock(escandalloService.calcularStockFabricable(producto.getId()));
             productoClienteRepository.save(producto);
         }
 
         pedidoClienteRepository.deleteById(id);
+    }
+
+    // ==================== LÓGICA DE ESCANDALLO ====================
+
+    /**
+     * Verificar que hay stock suficiente de materias primas para fabricar X unidades
+     */
+    private void verificarStockMateriasPrimas(Long idProductoCli, int cantidadPedida) {
+        List<Escandallo> lineas = escandalloRepository.findByProductoClienteId(idProductoCli);
+
+        for (Escandallo linea : lineas) {
+            ProductoProveedor materiaPrima = linea.getProductoProveedor();
+            BigDecimal cantidadNecesaria = linea.getCantidadNecesaria()
+                    .multiply(BigDecimal.valueOf(cantidadPedida));
+
+            // Comparar con stock disponible
+            if (BigDecimal.valueOf(materiaPrima.getStock()).compareTo(cantidadNecesaria) < 0) {
+                throw new RuntimeException(
+                        "Stock insuficiente de materia prima '" + materiaPrima.getNombre() +
+                                "'. Necesario: " + cantidadNecesaria.setScale(2, RoundingMode.HALF_UP) +
+                                ", Disponible: " + materiaPrima.getStock());
+            }
+        }
+    }
+
+    /**
+     * Descontar stock de materias primas según escandallo
+     */
+    private void descontarMateriasPrimas(Long idProductoCli, int cantidadPedida) {
+        List<Escandallo> lineas = escandalloRepository.findByProductoClienteId(idProductoCli);
+
+        for (Escandallo linea : lineas) {
+            ProductoProveedor materiaPrima = linea.getProductoProveedor();
+            BigDecimal cantidadDescontar = linea.getCantidadNecesaria()
+                    .multiply(BigDecimal.valueOf(cantidadPedida));
+
+            int nuevoStock = BigDecimal.valueOf(materiaPrima.getStock())
+                    .subtract(cantidadDescontar)
+                    .intValue();
+
+            materiaPrima.setStock(Math.max(nuevoStock, 0));
+            productoProveedorRepository.save(materiaPrima);
+        }
+    }
+
+    /**
+     * Devolver stock de materias primas (al eliminar/actualizar pedido)
+     */
+    private void devolverMateriasPrimas(Long idProductoCli, int cantidadDevuelta) {
+        List<Escandallo> lineas = escandalloRepository.findByProductoClienteId(idProductoCli);
+
+        for (Escandallo linea : lineas) {
+            ProductoProveedor materiaPrima = linea.getProductoProveedor();
+            BigDecimal cantidadDevolver = linea.getCantidadNecesaria()
+                    .multiply(BigDecimal.valueOf(cantidadDevuelta));
+
+            int nuevoStock = BigDecimal.valueOf(materiaPrima.getStock())
+                    .add(cantidadDevolver)
+                    .intValue();
+
+            materiaPrima.setStock(nuevoStock);
+            productoProveedorRepository.save(materiaPrima);
+        }
     }
 
     // ==================== CONSULTAS ESPECIALES ====================
@@ -211,7 +249,6 @@ public class PedidoClienteService {
         estadisticas.put("preparando", preparando);
         estadisticas.put("enEspera", enEspera);
 
-        // Siempre calcular porcentajes (0 si no hay total)
         if (total > 0) {
             estadisticas.put("porcentajeEntregados", Math.round((entregados * 100.0) / total));
             estadisticas.put("porcentajeEnviados", Math.round((enviados * 100.0) / total));
@@ -224,7 +261,6 @@ public class PedidoClienteService {
             estadisticas.put("porcentajeEnEspera", 0L);
         }
 
-        // Calcular total de ventas
         BigDecimal totalVentas = pedidoClienteRepository.calcularTotalVentas(EstadoPedido.ENTREGADO);
         estadisticas.put("totalVentas", totalVentas != null ? totalVentas : BigDecimal.ZERO);
 

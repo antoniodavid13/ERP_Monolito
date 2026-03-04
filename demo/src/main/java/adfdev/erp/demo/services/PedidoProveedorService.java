@@ -82,11 +82,12 @@ public class PedidoProveedorService {
     /**
      * Actualizar pedido existente
      */
-    public PedidoProveedor actualizarPedidoProveedor(Long id, PedidoProveedor pedidoActualizado,
-                                                     List<Map<String, Object>> productosSeleccionados) {
+    /**
+     * Actualizar solo datos generales del pedido (sin tocar productos)
+     */
+    public PedidoProveedor actualizarPedidoProveedor(Long id, PedidoProveedor pedidoActualizado) {
         return pedidoProveedorRepository.findById(id)
                 .map(pedido -> {
-                    // Actualizar campos básicos
                     pedido.setDireccion(pedidoActualizado.getDireccion());
                     pedido.setEstado(pedidoActualizado.getEstado());
                     pedido.setPrioridad(pedidoActualizado.getPrioridad());
@@ -95,40 +96,7 @@ public class PedidoProveedorService {
                     pedido.setIdTrabajador(pedidoActualizado.getIdTrabajador());
                     pedido.setIdAlmacen(pedidoActualizado.getIdAlmacen());
                     pedido.setIdMetodoEnvio(pedidoActualizado.getIdMetodoEnvio());
-
-                    // Restar stock de los detalles antiguos
-                    for (DetallePedidoProveedor detalleAntiguo : pedido.getDetalles()) {
-                        ProductoProveedor producto = detalleAntiguo.getProductoProveedor();
-                        int nuevoStock = producto.getStock() - detalleAntiguo.getCantidad();
-                        producto.setStock(Math.max(nuevoStock, 0));
-                        productoProveedorRepository.save(producto);
-                    }
-
-                    // Limpiar detalles antiguos
-                    pedido.getDetalles().clear();
-
-                    // Agregar nuevos productos
-                    for (Map<String, Object> productoData : productosSeleccionados) {
-                        Long idProducto = Long.valueOf(productoData.get("idProducto").toString());
-                        Integer cantidad = Integer.valueOf(productoData.get("cantidad").toString());
-
-                        ProductoProveedor producto = productoProveedorRepository.findById(idProducto)
-                                .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + idProducto));
-
-                        DetallePedidoProveedor detalle = new DetallePedidoProveedor(pedido, producto, cantidad);
-                        pedido.addDetalle(detalle);
-                    }
-
-                    // Sumar stock de los nuevos detalles
-                    for (DetallePedidoProveedor detalleNuevo : pedido.getDetalles()) {
-                        ProductoProveedor producto = detalleNuevo.getProductoProveedor();
-                        producto.setStock(producto.getStock() + detalleNuevo.getCantidad());
-                        productoProveedorRepository.save(producto);
-                    }
-
-                    // Recalcular total
                     pedido.calcularTotal();
-
                     return pedidoProveedorRepository.save(pedido);
                 })
                 .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));

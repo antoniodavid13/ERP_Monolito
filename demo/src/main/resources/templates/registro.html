@@ -4,65 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - ERP</title>
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link th:href="@{/css/login.css}" rel="stylesheet">
+    <style>
+        /* Canvas solo recibe eventos de mouse para la animacion, NO bloquea el formulario */
+        #stars-canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background: transparent;
+        }
+        .main-container {
+            position: relative;
+            z-index: 1;
+            pointer-events: none; /* pasa eventos a hijos */
+        }
+        .center-wrapper,
+        .login-card,
+        .login-card * {
+            pointer-events: all; /* el form y sus hijos reciben eventos normalmente */
+        }
+    </style>
 </head>
 <body>
-<main class="container-fluid p-0">
-    <div class="row g-0 m-0 main-container">
-        <!-- Columna Izquierda - Formulario -->
-        <section class="col-12 col-md-6 left-panel" aria-label="Formulario de registro">
-            <header>
-                <h1>Crear Cuenta</h1>
-            </header>
-            <article class="login-card">
-                <div th:if="${error}" class="alert-error">
-                    <span th:text="${error}"></span>
+
+<canvas id="stars-canvas"></canvas>
+
+<main class="main-container">
+    <div class="center-wrapper">
+
+        <header class="brand-header">
+            <h1>ERP<span>.</span></h1>
+            <p class="brand-sub">Crear nueva cuenta</p>
+        </header>
+
+        <article class="login-card">
+
+            <div th:if="${error}" class="alert-error">
+                <span>⚠</span>
+                <span th:text="${error}"></span>
+            </div>
+
+            <div th:if="${exito}" class="alert-success">
+                <span>✓</span>
+                <span th:text="${exito}"></span>
+            </div>
+
+            <form th:action="@{/registro}" method="post" id="idregistro" aria-label="Formulario de registro">
+
+                <div class="form-group">
+                    <label for="usuario">Usuario</label>
+                    <input type="text" id="usuario" name="usuario" placeholder="Nombre de usuario"
+                           th:value="${usuarioIngresado}" autocomplete="username" required>
+                    <span class="error-message" id="errorUsuario"></span>
                 </div>
 
-                <!-- MENSAJE DE ÉXITO (si existe) -->
-                <div th:if="${exito}" class="alert-success">
-                    <span th:text="${exito}"></span>
+                <div class="form-group">
+                    <label for="correo">Correo</label>
+                    <input type="email" id="correo" name="correo" placeholder="ejemplo@gmail.com"
+                           th:value="${correoIngresado}" autocomplete="email" required>
+                    <span class="error-message" id="errorCorreo"></span>
                 </div>
-                <form th:action="@{/registro}" method="post" id="idregistro" aria-label="Formulario de registro">
-                    <div class="form-group">
-                        <label for="usuario">Usuario</label>
-                        <input type="text" id="usuario" name="usuario" placeholder="Nombre de usuario" th:value="${usuarioIngresado}" required>
-                        <span id="errorUsuario" class="error-message"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="correo">Correo</label>
-                        <input type="email" id="correo" name="correo" placeholder="ejemplo@gmail.com" th:value="${correoIngresado}" required>
-                        <span id="errorCorreo" class="error-message"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" placeholder="**************" required>
-                        <span id="errorPassword" class="error-message"></span>
-                    </div>
-                    <button type="submit" class="btnLogin" disabled>Crear Cuenta</button>
-                </form>
-                <nav class="create-account">
-                    <a th:href="@{/login}">→ Ya tengo cuenta</a>
-                </nav>
-            </article>
-        </section>
 
-        <!-- Columna Derecha - Logo ERP -->
-        <aside class="col-12 col-md-6 right-panel" aria-label="Logo de la empresa">
-            <figure class="logo-container">
-                <img th:src="@{/img/logo.png}" alt="Logo del Erp">
-            </figure>
-        </aside>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••••••••"
+                           autocomplete="new-password" required>
+                    <span class="error-message" id="errorPassword"></span>
+                </div>
+
+                <button type="submit" class="btn-login btnLogin" id="btnSubmit" disabled>
+                    Crear Cuenta
+                </button>
+
+            </form>
+
+            <nav class="create-account">
+                <a th:href="@{/login}">→ Ya tengo cuenta</a>
+            </nav>
+
+        </article>
     </div>
 </main>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script th:src="@{/js/registro.js}"></script>
+<script>
+    (function () {
+        const canvas = document.getElementById('stars-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const STAR_COUNT   = 700;
+        const HOVER_RADIUS = 120;
+        const WARP_RADIUS  = 180;
+
+        let stars = [];
+        let mouse = { x: -9999, y: -9999 };
+
+        function resize() {
+            canvas.width  = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        function rand(min, max) { return min + Math.random() * (max - min); }
+
+        function initStars() {
+            stars = Array.from({ length: STAR_COUNT }, () => {
+                const r    = Math.random();
+                const size = r < 0.65 ? rand(0.2, 0.7)
+                           : r < 0.88 ? rand(0.7, 1.4)
+                           :             rand(1.4, 2.6);
+                const base = rand(0.25, 1.0);
+                return {
+                    ox: rand(0, canvas.width),
+                    oy: rand(0, canvas.height),
+                    x: 0, y: 0,
+                    size,
+                    baseAlpha:  base,
+                    alpha:      base,
+                    alphaDir:   Math.random() > 0.5 ? 1 : -1,
+                    alphaSpeed: rand(0.001, 0.006),
+                };
+            });
+            stars.forEach(s => { s.x = s.ox; s.y = s.oy; });
+        }
+
+        function tick() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (const s of stars) {
+                const ddx  = s.ox - mouse.x;
+                const ddy  = s.oy - mouse.y;
+                const dist = Math.sqrt(ddx * ddx + ddy * ddy);
+
+                if (dist < WARP_RADIUS && dist > 0) {
+                    const strength = Math.pow(1 - dist / WARP_RADIUS, 2.2);
+                    const angle    = Math.atan2(ddy, ddx);
+
+                    if (dist < HOVER_RADIUS * 0.4) {
+                        const push = (1 - dist / (HOVER_RADIUS * 0.4)) * 30;
+                        s.x = s.ox + Math.cos(angle) * push;
+                        s.y = s.oy + Math.sin(angle) * push;
+                    } else {
+                        const pull     = strength * 28;
+                        const swirl    = strength * 1.8;
+                        const newAngle = angle + Math.PI + swirl;
+                        s.x = s.ox + Math.cos(angle) * (-pull) + Math.cos(newAngle - angle) * pull * 0.4;
+                        s.y = s.oy + Math.sin(angle) * (-pull) + Math.sin(newAngle - angle) * pull * 0.4;
+                    }
+                    s.alpha = Math.min(1, s.baseAlpha + strength * 0.7);
+                } else {
+                    s.x += (s.ox - s.x) * 0.08;
+                    s.y += (s.oy - s.y) * 0.08;
+                    s.alpha += s.alphaSpeed * s.alphaDir;
+                    if (s.alpha >= s.baseAlpha || s.alpha <= 0.1) s.alphaDir *= -1;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = s.alpha;
+
+                const glowMult = dist < WARP_RADIUS ? Math.pow(1 - dist / WARP_RADIUS, 1.5) : 0;
+
+                if (s.size > 1.1 || glowMult > 0.1) {
+                    const glowR = s.size * (2.5 + glowMult * 6);
+                    const grad  = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowR);
+                    grad.addColorStop(0,    'rgba(255,255,255,0.95)');
+                    grad.addColorStop(0.25, 'rgba(255,255,255,0.35)');
+                    grad.addColorStop(1,    'transparent');
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, glowR, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size * (1 + glowMult * 1.2), 0, Math.PI * 2);
+                ctx.fill();
+
+                if (dist < HOVER_RADIUS * 0.7 && s.size > 0.5) {
+                    const armLen  = s.size * (4 + glowMult * 10);
+                    const opacity = glowMult * 0.6;
+                    ctx.strokeStyle = `rgba(255,255,255,${opacity})`;
+                    ctx.lineWidth   = 0.6;
+                    const rot = Date.now() * 0.0004;
+                    for (let i = 0; i < 4; i++) {
+                        const a = rot + (Math.PI / 4) * i;
+                        ctx.beginPath();
+                        ctx.moveTo(s.x, s.y);
+                        ctx.lineTo(s.x + Math.cos(a) * armLen, s.y + Math.sin(a) * armLen);
+                        ctx.stroke();
+                    }
+                }
+                ctx.restore();
+            }
+            requestAnimationFrame(tick);
+        }
+
+        function start() {
+            resize();
+            initStars();
+            tick();
+        }
+
+        /* El mousemove se escucha en window para no necesitar pointer-events en el canvas */
+        window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+        window.addEventListener('resize', () => { resize(); initStars(); });
+        start();
+    })();
+</script>
+<script th:src="@{/js/registro.js}" defer></script>
 </body>
 </html>

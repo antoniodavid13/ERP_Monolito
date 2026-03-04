@@ -20,13 +20,18 @@ public class ProductoCliente {
     @Column(name = "stock", nullable = false)
     private Integer stock;
 
-    @Column(name = "precio_unitario", precision = 4, scale = 2, columnDefinition = "DECIMAL(4,2)")
+    @Column(name = "precio_unitario", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2)")
     private BigDecimal precioUnitario;
 
     @Column(name = "descuento")
     private Integer descuento;
 
-    // Enum para estados del producto
+    @Column(name = "coste_escandallo", precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) DEFAULT 0")
+    private BigDecimal costeEscandallo;
+
+    @Column(name = "margen_beneficio", precision = 5, scale = 2, columnDefinition = "DECIMAL(5,2) DEFAULT 0")
+    private BigDecimal margenBeneficio;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "estado")
     private EstadoProducto estado;

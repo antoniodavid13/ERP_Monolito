@@ -1,5 +1,9 @@
 package adfdev.erp.demo.Controllers;
 
+import adfdev.erp.demo.Escandallo;
+import adfdev.erp.demo.DetallePedidoCliente;
+import adfdev.erp.demo.services.Escandalloservice;
+import java.util.LinkedHashMap;
 import adfdev.erp.demo.PedidoCliente;
 import adfdev.erp.demo.PedidoCliente.EstadoPedido;
 import adfdev.erp.demo.ProductoCliente;
@@ -16,10 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/pedidos-clientes")
@@ -42,6 +43,9 @@ public class PedidoClienteController {
 
     @Autowired(required = false)
     private MetodoEnvioService metodoEnvioService;
+
+    @Autowired
+    private Escandalloservice escandalloService;
 
     /**
      * Listar todos los pedidos de clientes
@@ -189,35 +193,16 @@ public class PedidoClienteController {
      * Procesar actualización de pedido
      */
     @PostMapping("/actualizar/{id}")
-    public String actualizarPedidoCliente(
-            @PathVariable Long id,
-            @ModelAttribute PedidoCliente pedido,
-            @RequestParam(value = "productosIds", required = false) List<Long> productosIds,
-            @RequestParam(value = "cantidades", required = false) List<Integer> cantidades,
-            RedirectAttributes redirectAttributes) {
-
+    public String actualizarPedidoCliente(@PathVariable Long id,
+                                          @ModelAttribute PedidoCliente pedido,
+                                          RedirectAttributes redirectAttributes) {
         try {
-            // Validar que se hayan seleccionado productos
-            if (productosIds == null || productosIds.isEmpty()) {
-                throw new RuntimeException("Debe seleccionar al menos un producto");
-            }
-
-            // Preparar lista de productos seleccionados
-            List<Map<String, Object>> productosSeleccionados = new ArrayList<>();
-            for (int i = 0; i < productosIds.size(); i++) {
-                Map<String, Object> productoData = new HashMap<>();
-                productoData.put("idProducto", productosIds.get(i));
-                productoData.put("cantidad", cantidades.get(i));
-                productosSeleccionados.add(productoData);
-            }
-
-            pedidoClienteService.actualizarPedidoCliente(id, pedido, productosSeleccionados);
+            pedidoClienteService.actualizarPedidoCliente(id, pedido);
             redirectAttributes.addFlashAttribute("exito", "Pedido actualizado exitosamente");
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/pedidos-clientes/editar/" + id;
         }
-
         return "redirect:/pedidos-clientes";
     }
 
@@ -230,6 +215,23 @@ public class PedidoClienteController {
         return pedidoClienteService.obtenerPorId(id)
                 .map(pedido -> {
                     model.addAttribute("pedido", pedido);
+
+                    Map<String, List<Escandallo>> escandallosPedido = new LinkedHashMap<>();
+                    Map<String, Integer> cantidadesPedido = new LinkedHashMap<>();
+
+                    for (DetallePedidoCliente detalle : pedido.getDetalles()) {
+                        String nombreProducto = detalle.getProductoCliente().getNombre();
+                        List<Escandallo> lineas = escandalloService
+                                .obtenerPorProductoCliente(detalle.getProductoCliente().getId());
+                        if (!lineas.isEmpty()) {
+                            escandallosPedido.put(nombreProducto, lineas);
+                            cantidadesPedido.put(nombreProducto, detalle.getCantidad());
+                        }
+                    }
+
+                    model.addAttribute("escandallosPedido", escandallosPedido);
+                    model.addAttribute("cantidadesPedido", cantidadesPedido);
+
                     return "pedidos-clientes/detalle";
                 })
                 .orElseGet(() -> {

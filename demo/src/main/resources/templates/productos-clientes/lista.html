@@ -221,10 +221,9 @@
                             <td th:text="${producto.nombre}">Laptop HP Pavilion</td>
                             <td class="stock-col" th:text="${#numbers.formatInteger(producto.stock, 0, 'COMMA')}">1,000</td>
                             <td class="precio-col" th:text="${#numbers.formatDecimal(producto.precioUnitario, 0, 'COMMA', 2, 'POINT') + '€'}">25.99€</td>
-                            <td class="descuento-col" th:text="${producto.descuento + '%'}">10%</td>
+                            <td class="descuento-col" th:text="${(producto.descuento != null ? producto.descuento : 0) + '%'}">
                             <td class="precio-final-col"
-                                th:text="${#numbers.formatDecimal(producto.precioUnitario * (1 - producto.descuento / 100.0), 0, 'COMMA', 2, 'POINT') + '€'}">
-                                23.39€
+                                th:text="${producto.precioUnitario != null ? #numbers.formatDecimal(producto.precioUnitario * (1 - (producto.descuento != null ? producto.descuento : 0) / 100.0), 0, 'COMMA', 2, 'POINT') + '€' : '0,00€'}">
                             </td>
                             <td>
                 <span class="badge-estado"
@@ -237,6 +236,9 @@
                                 </a>
                                 <a th:href="@{/productos-clientes/editar/{id}(id=${producto.id})}" class="btn-action editar" title="Editar">
                                     <i class="bi bi-pencil"></i>
+                                </a>
+                                <a th:href="@{/escandallo/{id}(id=${producto.id})}" class="btn-action ver" title="Escandallo">
+                                    <i class="bi bi-puzzle"></i>
                                 </a>
                                 <a th:href="@{/productos-clientes/eliminar/{id}(id=${producto.id})}"
                                    class="btn-action eliminar"
